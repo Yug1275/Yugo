@@ -72,13 +72,11 @@ const userSchema = new mongoose.Schema(
 );
 
 // ─── Hash password before saving ──────────────────────────────────────────
-userSchema.pre('save', async function (next) {
-  // Only hash if password was modified
-  if (!this.isModified('password')) return next();
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
   const salt = await bcrypt.genSalt(12);
   this.password = await bcrypt.hash(this.password, salt);
-  next();
-});
+});;
 
 // ─── Instance method: compare password ────────────────────────────────────
 userSchema.methods.comparePassword = async function (candidatePassword) {
@@ -93,7 +91,6 @@ userSchema.methods.toSafeObject = function () {
 };
 
 // ─── Indexes ──────────────────────────────────────────────────────────────
-userSchema.index({ email: 1 });
 userSchema.index({ role: 1 });
 userSchema.index({ isActive: 1 });
 

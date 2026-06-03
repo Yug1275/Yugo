@@ -56,9 +56,7 @@ const driverSchema = new mongoose.Schema(
 );
 
 // ─── Indexes ──────────────────────────────────────────────────────────────
-driverSchema.index({ userId: 1 });
 driverSchema.index({ availability: 1, isApproved: 1, isSuspended: 1 });
-driverSchema.index({ licenseNumber: 1 });
 
 const Driver = mongoose.model('Driver', driverSchema);
 module.exports = Driver;
