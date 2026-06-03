@@ -1,0 +1,13 @@
+{
+  "name": "yugo-backend",
+  "version": "1.0.0",
+  "description": "YUGO Ride-Hailing Platform - Backend API",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "keywords": ["yugo", "ride-hailing", "express", "mongodb"],
+  "author": "Yug",
+  "license": "MIT"
+}
