@@ -1,4 +1,5 @@
 import { Navigate } from 'react-router-dom';
+import Logo from '../components/common/Logo';
 import useAuth from '../hooks/useAuth';
 import useTheme from '../hooks/useTheme';
 
@@ -6,7 +7,6 @@ const AuthLayout = ({ children }) => {
   const { isAuthenticated, user } = useAuth();
   const { isDark, toggleTheme } = useTheme();
 
-  // Redirect if already logged in
   if (isAuthenticated && user) {
     return <Navigate to={`/${user.role}`} replace />;
   }
@@ -29,16 +29,7 @@ const AuthLayout = ({ children }) => {
           padding: '16px 24px',
         }}
       >
-        <span
-          style={{
-            fontSize: '1.4rem',
-            fontWeight: 800,
-            color: 'var(--color-primary)',
-            fontFamily: "'Plus Jakarta Sans', sans-serif",
-          }}
-        >
-          YUGO
-        </span>
+        <Logo size="sm" showTagline={false} />
         <button
           onClick={toggleTheme}
           style={{
@@ -58,7 +49,7 @@ const AuthLayout = ({ children }) => {
         </button>
       </div>
 
-      {/* Centered form area */}
+      {/* Centered form */}
       <div
         style={{
           flex: 1,

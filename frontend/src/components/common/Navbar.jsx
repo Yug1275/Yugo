@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import Logo from './Logo';
 import useTheme from '../../hooks/useTheme';
 import useAuth from '../../hooks/useAuth';
 
@@ -23,24 +24,14 @@ const Navbar = () => {
       }}
     >
       {/* Logo */}
-      <Link
-        to="/"
-        style={{
-          fontSize: '1.4rem',
-          fontWeight: 800,
-          color: 'var(--color-primary)',
-          fontFamily: "'Plus Jakarta Sans', sans-serif",
-          letterSpacing: '-0.5px',
-        }}
-      >
-        YUGO
-      </Link>
+      <Logo size="sm" linkTo={isAuthenticated ? `/${user?.role}` : '/'} />
 
       {/* Right side */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         {/* Theme toggle */}
         <button
           onClick={toggleTheme}
+          title="Toggle theme"
           style={{
             background: 'var(--color-surface-2)',
             border: '1px solid var(--color-border)',
@@ -53,7 +44,6 @@ const Navbar = () => {
             alignItems: 'center',
             justifyContent: 'center',
           }}
-          title="Toggle theme"
         >
           {isDark ? '☀️' : '🌙'}
         </button>
@@ -66,6 +56,7 @@ const Navbar = () => {
                 fontSize: '0.85rem',
                 fontWeight: 600,
                 color: 'var(--color-text-primary)',
+                textDecoration: 'none',
               }}
             >
               {user?.name}

@@ -7,10 +7,17 @@ import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
 import ForgotPassword from '../pages/auth/ForgotPassword';
 
-// Placeholder dashboards — replaced phase by phase
+// Rider pages
+import RiderLayout from '../layouts/RiderLayout';
+import RiderDashboard from '../pages/rider/RiderDashboard';
+import RideHistory from '../pages/rider/RideHistory';
+import Profile from '../pages/rider/Profile';
+import SavedLocations from '../pages/rider/SavedLocations';
+
+// 404
 import NotFound from '../pages/NotFound';
 
-// Role-based default redirect
+// Role-based root redirect
 import useAuth from '../hooks/useAuth';
 
 const RoleRedirect = () => {
@@ -23,39 +30,31 @@ const AppRouter = () => {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Root → redirect based on auth state */}
+        {/* Root */}
         <Route path="/" element={<RoleRedirect />} />
 
-        {/* Public only — redirect to dashboard if already logged in */}
-        <Route
-          path="/login"
-          element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <PublicRoute>
-              <Register />
-            </PublicRoute>
-          }
-        />
+        {/* Public only */}
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        {/* Protected stubs — pages added per phase */}
+        {/* Rider routes */}
         <Route
-          path="/rider/*"
+          path="/rider"
           element={
             <ProtectedRoute allowedRoles={['rider']}>
-              <div className="page-container" style={{ paddingTop: 40 }}>
-                <h2>Rider Dashboard — Coming in Phase 7</h2>
-              </div>
+              <RiderLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<RiderDashboard />} />
+          <Route path="history" element={<RideHistory />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="locations" element={<SavedLocations />} />
+          {/* /rider/book added in Phase 9 */}
+        </Route>
+
+        {/* Driver routes — Phase 10 */}
         <Route
           path="/driver/*"
           element={
@@ -66,6 +65,8 @@ const AppRouter = () => {
             </ProtectedRoute>
           }
         />
+
+        {/* Admin routes — Phase 15 */}
         <Route
           path="/admin/*"
           element={
