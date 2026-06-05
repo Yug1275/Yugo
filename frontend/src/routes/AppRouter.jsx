@@ -1,3 +1,4 @@
+import RideTracking from '../pages/rider/RideTracking';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import PublicRoute from './PublicRoute';
 import ProtectedRoute from './ProtectedRoute';
@@ -20,6 +21,7 @@ import NotFound from '../pages/NotFound';
 // Role-based root redirect
 import useAuth from '../hooks/useAuth';
 import BookRide from '../pages/rider/BookRide';
+
 
 const RoleRedirect = () => {
   const { isAuthenticated, user } = useAuth();
@@ -49,10 +51,11 @@ const AppRouter = () => {
           }
         >
           <Route index element={<RiderDashboard />} />
+          <Route path="book" element={<BookRide />} />
+          <Route path="tracking/:rideId" element={<RideTracking />} />   {/* ← new */}
           <Route path="history" element={<RideHistory />} />
           <Route path="profile" element={<Profile />} />
           <Route path="locations" element={<SavedLocations />} />
-          <Route path="book" element={<BookRide />} />
         </Route>
 
         {/* Driver routes — Phase 10 */}

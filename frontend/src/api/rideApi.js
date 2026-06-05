@@ -6,6 +6,9 @@ export const estimateFareApi = (data) =>
 export const createRideApi = (data) =>
   axiosInstance.post('/rides', data);
 
+export const getActiveRideApi = () =>
+  axiosInstance.get('/rides/active');
+
 export const getRideByIdApi = (id) =>
   axiosInstance.get(`/rides/${id}`);
 

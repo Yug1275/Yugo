@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
-import { getRiderRidesApi } from '../../api/rideApi';
+import { getRiderRidesApi, getActiveRideApi, cancelRideApi } from '../../api/rideApi';
 import Badge from '../../components/common/Badge';
 import Loader from '../../components/common/Loader';
 import { formatCurrency, formatDateTime } from '../../utils/helpers';
@@ -48,6 +48,32 @@ const RiderDashboard = () => {
   const [stats, setStats] = useState({ total: 0, completed: 0, cancelled: 0, spent: 0 });
   const [loading, setLoading] = useState(true);
 
+  const [activeRide, setActiveRide] = useState(null);
+
+  useEffect(() => {
+    const checkActiveRide = async () => {
+      try {
+        const res = await getActiveRideApi();
+        setActiveRide(res.data.data);
+      } catch {
+        setActiveRide(null);
+      }
+    };
+    checkActiveRide();
+  }, []);
+
+  const handleCancelRide = async () => {
+    if (!activeRide) return;
+    const ok = window.confirm('Cancel this active ride?');
+    if (!ok) return;
+    try {
+      await cancelRideApi(activeRide._id, 'Cancelled by rider');
+      setActiveRide(null);
+    } catch (err) {
+      // ignore for now — could show toast
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -87,6 +113,31 @@ const RiderDashboard = () => {
         </h2>
         <p className="page-subtitle">Here's what's happening with your rides</p>
       </div>
+
+      {/* Active ride banner */}
+      {activeRide && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ fontSize: '1.5rem' }}>🚗</div>
+              <div>
+                <p style={{ margin: 0, fontWeight: 700 }}>Active ride in progress</p>
+                <p style={{ margin: 0, color: 'var(--color-text-muted)' }}>
+                  To: {activeRide.destination?.address}
+                </p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Link to={`/rider/track/${activeRide._id}`} className="btn btn-ghost">
+                Track Ride →
+              </Link>
+              <button onClick={handleCancelRide} className="btn btn-ghost" style={{ color: '#dc2626' }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stat cards */}
       <div
