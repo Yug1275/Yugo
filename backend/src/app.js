@@ -48,10 +48,9 @@ app.get('/health', (req, res) => {
 
 // ─── API Routes (uncommented phase by phase) ──────────────────────────────
 app.use('/api/auth', require('./routes/authRoutes'));
-
-// app.use('/api/users', require('./routes/userRoutes'));
-// app.use('/api/drivers', require('./routes/driverRoutes'));
-// app.use('/api/rides', require('./routes/rideRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/drivers', require('./routes/driverRoutes'));
+app.use('/api/rides', require('./routes/rideRoutes'));
 // app.use('/api/payments', require('./routes/paymentRoutes'));
 // app.use('/api/reviews', require('./routes/reviewRoutes'));
 // app.use('/api/notifications', require('./routes/notificationRoutes'));

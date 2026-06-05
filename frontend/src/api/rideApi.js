@@ -14,3 +14,6 @@ export const cancelRideApi = (id, reason) =>
 
 export const getRiderRidesApi = (params) =>
   axiosInstance.get('/users/rides', { params });
+
+export const getNearbyDriversApi = (lat, lng) =>
+  axiosInstance.get('/drivers/nearby', { params: { lat, lng } });

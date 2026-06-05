@@ -10,10 +10,9 @@ const driverSchema = new mongoose.Schema(
     },
     licenseNumber: {
       type: String,
-      required: [true, 'License number is required'],
       unique: true,
-      trim: true,
-      uppercase: true,
+      sparse: true,       // ← allows multiple null values with unique index
+      default: null,
     },
     rating: {
       type: Number,

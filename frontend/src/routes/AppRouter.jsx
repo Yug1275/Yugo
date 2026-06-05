@@ -19,6 +19,7 @@ import NotFound from '../pages/NotFound';
 
 // Role-based root redirect
 import useAuth from '../hooks/useAuth';
+import BookRide from '../pages/rider/BookRide';
 
 const RoleRedirect = () => {
   const { isAuthenticated, user } = useAuth();
@@ -51,7 +52,7 @@ const AppRouter = () => {
           <Route path="history" element={<RideHistory />} />
           <Route path="profile" element={<Profile />} />
           <Route path="locations" element={<SavedLocations />} />
-          {/* /rider/book added in Phase 9 */}
+          <Route path="book" element={<BookRide />} />
         </Route>
 
         {/* Driver routes — Phase 10 */}
