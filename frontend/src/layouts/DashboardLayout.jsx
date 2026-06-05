@@ -19,7 +19,7 @@ const DashboardLayout = ({ children, sidebarLinks = [], requiredRole }) => {
       <Navbar />
       <div style={{ display: 'flex' }}>
         <Sidebar links={sidebarLinks} />
-        <main style={{ flex: 1, padding: '28px 32px', overflowX: 'hidden' }}>
+        <main className="rider-main" style={{ flex: 1, padding: '28px 32px', overflowX: 'hidden' }}>
           {children}
         </main>
       </div>

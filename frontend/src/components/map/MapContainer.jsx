@@ -62,6 +62,7 @@ const MapContainer = ({
 }) => {
   return (
     <div
+      className="responsive-map"
       style={{
         width: '100%',
         height,

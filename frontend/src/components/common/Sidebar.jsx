@@ -5,7 +5,9 @@ const Sidebar = ({ links = [] }) => {
   const { user } = useAuth();
 
   return (
+    <>
     <aside
+      className="desktop-sidebar responsive-sticky"
       style={{
         width: 240,
         minHeight: 'calc(100vh - 64px)',
@@ -72,6 +74,35 @@ const Sidebar = ({ links = [] }) => {
         </NavLink>
       ))}
     </aside>
+
+    {/* Mobile bottom nav (rendered here so every layout with Sidebar gets a mobile nav) */}
+    <nav className="mobile-bottom-nav">
+      {links.map((link) => (
+        <NavLink
+          key={link.to}
+          to={link.to}
+          end={link.end}
+          style={({ isActive }) => ({
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 3,
+            padding: '8px 0',
+            flex: 1,
+            fontSize: '0.6rem',
+            fontWeight: 600,
+            color: isActive ? 'var(--color-primary)' : 'var(--color-text-muted)',
+            textDecoration: 'none',
+            transition: 'color 0.15s ease',
+          })}
+        >
+          <span style={{ fontSize: '1.2rem' }}>{link.icon}</span>
+          <span>{link.label}</span>
+        </NavLink>
+      ))}
+    </nav>
+    </>
   );
 };
 

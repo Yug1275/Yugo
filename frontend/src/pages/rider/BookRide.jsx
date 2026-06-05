@@ -111,14 +111,7 @@ const BookRide = () => {
         <p className="page-subtitle">Enter your pickup and destination</p>
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '360px 1fr',
-          gap: 24,
-          alignItems: 'start',
-        }}
-      >
+      <div className="book-ride-grid">
         {/* ─── Left panel ────────────────────────────────────── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div className="card">
@@ -363,14 +356,14 @@ const BookRide = () => {
         </div>
 
         {/* ─── Right panel: Map ──────────────────────────────── */}
-        <div style={{ position: 'sticky', top: 88 }}>
+        <div className="map-panel">
           <MapContainer
             currentLocation={currentLocation}
             pickup={pickup}
             destination={destination}
             routeCoordinates={routeCoordinates}
             nearbyDrivers={nearbyDrivers}
-            height="520px"
+            height="420px"
           />
 
           {/* Legend */}

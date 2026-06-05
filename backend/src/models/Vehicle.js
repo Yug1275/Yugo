@@ -45,9 +45,6 @@ const vehicleSchema = new mongoose.Schema(
   }
 );
 
-// ─── Indexes ──────────────────────────────────────────────────────────────
-vehicleSchema.index({ driverId: 1 });
-vehicleSchema.index({ vehicleNumber: 1 });
 
 const Vehicle = mongoose.model('Vehicle', vehicleSchema);
 module.exports = Vehicle;

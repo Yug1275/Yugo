@@ -153,7 +153,7 @@ const RideTracking = () => {
         <Badge status={ride.status} />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 24, alignItems: 'start' }}>
+      <div className="tracking-grid">
 
         {/* ─── Left panel ────────────────────────────────────── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -345,13 +345,13 @@ const RideTracking = () => {
         </div>
 
         {/* ─── Right panel: Map ──────────────────────────────── */}
-        <div style={{ position: 'sticky', top: 88 }}>
+        <div className="map-panel">
           <TrackingMap
             pickup={ride.pickup}
             destination={ride.destination}
             driverLocation={driver?.currentLocation?.lat ? driver.currentLocation : null}
             routeCoordinates={routeCoordinates}
-            height="540px"
+            height="420px"
           />
 
           {/* Legend */}

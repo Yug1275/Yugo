@@ -1,22 +1,19 @@
-import { useState } from 'react';
 import { Navigate, Outlet, NavLink } from 'react-router-dom';
 import Navbar from '../components/common/Navbar';
 import useAuth from '../hooks/useAuth';
 
-const riderLinks = [
-  { to: '/rider',           end: true, icon: '🏠', label: 'Home'      },
-  { to: '/rider/book',               icon: '🚗', label: 'Book'      },
-  { to: '/rider/history',            icon: '🕒', label: 'History'   },
-  { to: '/rider/search',             icon: '🔍', label: 'Search'    },
-  { to: '/rider/profile',            icon: '👤', label: 'Profile'   },
-  { to: '/rider/locations',          icon: '📍', label: 'Saved'     },
+const driverLinks = [
+  { to: '/driver',          end: true, icon: '🏠', label: 'Dashboard' },
+  { to: '/driver/rides',             icon: '🚗', label: 'Rides'     },
+  { to: '/driver/earnings',          icon: '💰', label: 'Earnings'  },
+  { to: '/driver/profile',           icon: '👤', label: 'Profile'   },
 ];
 
-const RiderLayout = () => {
+const DriverLayout = () => {
   const { isAuthenticated, user } = useAuth();
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (user?.role !== 'rider') return <Navigate to={`/${user?.role}`} replace />;
+  if (user?.role !== 'driver') return <Navigate to={`/${user?.role}`} replace />;
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
@@ -24,8 +21,9 @@ const RiderLayout = () => {
 
       <div style={{ display: 'flex' }}>
 
-        {/* ── Desktop Sidebar ─────────────────────────────────── */}
+        {/* Desktop Sidebar */}
         <aside
+          className="desktop-sidebar"
           style={{
             width: 220,
             minHeight: 'calc(100vh - 64px)',
@@ -39,9 +37,7 @@ const RiderLayout = () => {
             top: 64,
             flexShrink: 0,
           }}
-          className="desktop-sidebar"
         >
-          {/* User info */}
           <div
             style={{
               padding: '0 16px 16px',
@@ -54,7 +50,7 @@ const RiderLayout = () => {
                 width: 38,
                 height: 38,
                 borderRadius: '50%',
-                background: 'var(--color-primary)',
+                background: '#0f172a',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -70,11 +66,11 @@ const RiderLayout = () => {
               {user?.name}
             </p>
             <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', margin: 0 }}>
-              Rider
+              Driver
             </p>
           </div>
 
-          {riderLinks.map((link) => (
+          {driverLinks.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
@@ -99,18 +95,18 @@ const RiderLayout = () => {
           ))}
         </aside>
 
-        {/* ── Main Content ─────────────────────────────────────── */}
+        {/* Main content */}
         <main
+          className="driver-main"
           style={{ flex: 1, padding: '24px 28px', overflowX: 'hidden' }}
-          className="rider-main"
         >
           <Outlet />
         </main>
       </div>
 
-      {/* ── Mobile Bottom Nav ────────────────────────────────── */}
+      {/* Mobile Bottom Nav */}
       <nav className="mobile-bottom-nav">
-        {riderLinks.map((link) => (
+        {driverLinks.map((link) => (
           <NavLink
             key={link.to}
             to={link.to}
@@ -139,4 +135,4 @@ const RiderLayout = () => {
   );
 };
 
-export default RiderLayout;
+export default DriverLayout;

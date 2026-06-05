@@ -90,7 +90,7 @@ const Profile = () => {
         <p className="page-subtitle">Manage your account information</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 24 }}>
+      <div className="responsive-grid-auto-fit" style={{ gap: 20, ['--grid-min']: '300px' }}>
 
         {/* Profile card */}
         <div className="card">

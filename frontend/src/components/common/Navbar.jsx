@@ -12,7 +12,7 @@ const Navbar = () => {
       style={{
         background: 'var(--color-surface)',
         borderBottom: '1px solid var(--color-border)',
-        padding: '0 24px',
+        padding: '0 20px',
         height: 64,
         display: 'flex',
         alignItems: 'center',
@@ -27,8 +27,27 @@ const Navbar = () => {
       <Logo size="sm" linkTo={isAuthenticated ? `/${user?.role}` : '/'} />
 
       {/* Right side */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        {/* Theme toggle */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+
+        {isAuthenticated ? (
+          <>
+            {/* Name — hidden on very small screens */}
+            <span
+              style={{
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                color: 'var(--color-text-primary)',
+                maxWidth: 100,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+              className="nav-username"
+            >
+              {user?.name}
+            </span>
+
+            {/* Theme toggle */}
         <button
           onClick={toggleTheme}
           title="Toggle theme"
@@ -36,32 +55,23 @@ const Navbar = () => {
             background: 'var(--color-surface-2)',
             border: '1px solid var(--color-border)',
             borderRadius: 8,
-            width: 38,
-            height: 38,
+            width: 36,
+            height: 36,
             cursor: 'pointer',
-            fontSize: '1.1rem',
+            fontSize: '1rem',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            flexShrink: 0,
           }}
         >
           {isDark ? '☀️' : '🌙'}
         </button>
-
-        {isAuthenticated ? (
-          <>
-            <Link
-              to={`/${user?.role}`}
-              style={{
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                color: 'var(--color-text-primary)',
-                textDecoration: 'none',
-              }}
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={logout}
+              style={{ flexShrink: 0 }}
             >
-              {user?.name}
-            </Link>
-            <button className="btn btn-ghost btn-sm" onClick={logout}>
               Logout
             </button>
           </>

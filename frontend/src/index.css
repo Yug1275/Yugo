@@ -331,3 +331,176 @@ a:hover {
   font-size: 1rem;
   color: var(--color-text-secondary);
 }
+/* ─── Responsive Utilities ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* Page layout */
+  .page-container {
+    padding: 0 16px;
+  }
+
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.4rem; }
+  h3 { font-size: 1.2rem; }
+
+  /* Cards */
+  .card {
+    padding: 16px;
+  }
+
+  /* Buttons */
+  .btn {
+    font-size: 0.85rem;
+    padding: 9px 16px;
+  }
+}
+/* ─── Mobile Bottom Navigation ───────────────────────────────────────── */
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+
+  /* Hide desktop sidebar */
+  .desktop-sidebar {
+    display: none !important;
+  }
+
+  /* Main content: no left padding, add bottom padding for bottom nav */
+  .rider-main {
+    padding: 16px 14px 80px !important;
+  }
+
+  /* Show bottom nav */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+    z-index: 100;
+    height: 62px;
+  }
+}
+@media (max-width: 480px) {
+  .nav-username {
+    display: none;
+  }
+}
+/* ─── BookRide Layout ────────────────────────────────────────────────── */
+.book-ride-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.map-panel {
+  position: sticky;
+  top: 88px;
+}
+
+@media (max-width: 900px) {
+  .book-ride-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .map-panel {
+    position: static;
+  }
+}
+/* ─── RideTracking Layout ────────────────────────────────────────────── */
+.tracking-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .tracking-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 768px) {
+  /* Map height on mobile */
+  .leaflet-container {
+    min-height: 280px;
+  }
+}
+
+/* ─── Responsive helpers (class-based) ───────────────────────────────── */
+
+.responsive-sticky {
+  position: sticky;
+  top: 64px;
+}
+
+.responsive-map {
+  /* default height controlled by inline style or prop; overridden on mobile */
+  width: 100%;
+}
+
+.responsive-grid-auto-fit {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--grid-min, 160px), 1fr));
+  gap: 12px;
+}
+
+/* Ensure flex rows can wrap to avoid overflow */
+.wrap-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  /* Two column layouts stack */
+  .book-ride-grid,
+  .tracking-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Map panels become static to flow with content */
+  .map-panel,
+  .responsive-sticky {
+    position: static !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Reduce map heights on small devices */
+  .responsive-map,
+  .leaflet-container {
+    height: 280px !important;
+    min-height: 280px !important;
+  }
+
+  /* Card grids: reduce min width to 140px on mobile */
+  .responsive-grid-auto-fit {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+
+  /* Main content bottom padding to avoid bottom nav */
+  .rider-main {
+    padding-left: 16px !important;
+    padding-right: 14px !important;
+    padding-top: 16px !important;
+    padding-bottom: 80px !important;
+  }
+
+  /* Navbar username hidden on very small screens handled separately */
+}
+
+@media (max-width: 480px) {
+  h1 { font-size: 1.4rem; }
+  h2 { font-size: 1.2rem; }
+}
+@media (max-width: 768px) {
+  .driver-main {
+    padding: 16px 14px 80px !important;
+  }
+}
