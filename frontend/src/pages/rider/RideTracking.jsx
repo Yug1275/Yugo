@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import TrackingMap from '../../components/map/TrackingMap';
 import Badge from '../../components/common/Badge';
@@ -6,10 +6,10 @@ import Button from '../../components/common/Button';
 import Loader from '../../components/common/Loader';
 import Modal from '../../components/common/Modal';
 import { getRideByIdApi, cancelRideApi } from '../../api/rideApi';
+import { useRiderSocket, useRideEmitter } from '../../hooks/useRideSocket';
 import { fetchRoute } from '../../utils/mapHelpers';
 import { formatCurrency, formatDateTime, formatDuration } from '../../utils/helpers';
 
-// Human-readable status messages
 const STATUS_INFO = {
   pending: {
     label: 'Looking for a driver...',
@@ -18,8 +18,8 @@ const STATUS_INFO = {
     color: 'var(--color-warning)',
   },
   accepted: {
-    label: 'Driver is on the way',
-    desc: 'A driver has accepted your ride and is heading to your pickup point.',
+    label: 'Driver accepted your ride',
+    desc: 'A driver is on the way to your pickup point.',
     icon: '🚗',
     color: 'var(--color-primary)',
   },
@@ -52,28 +52,37 @@ const STATUS_INFO = {
 const RideTracking = () => {
   const { rideId } = useParams();
   const navigate = useNavigate();
+  const { emitCancelRide } = useRideEmitter();
 
   const [ride, setRide] = useState(null);
+  const [rideStatus, setRideStatus] = useState('pending');
+  const [driverInfo, setDriverInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [routeCoordinates, setRouteCoordinates] = useState(null);
+  const [liveDriverLocation, setLiveDriverLocation] = useState(null);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [cancelLoading, setCancelLoading] = useState(false);
   const [cancelError, setCancelError] = useState('');
+  const [statusHistory, setStatusHistory] = useState([]);
 
+  // Fetch ride once on mount
   const fetchRide = useCallback(async () => {
     try {
       const res = await getRideByIdApi(rideId);
       const rideData = res.data.data;
       setRide(rideData);
+      setRideStatus(rideData.status);
 
-      // Fetch route once when we have both coordinates
-      if (
-        rideData.pickup?.coordinates &&
-        rideData.destination?.coordinates &&
-        !routeCoordinates
-      ) {
+      if (rideData.driverId) {
+        setDriverInfo(rideData.driverId);
+        if (rideData.driverId.currentLocation?.lat) {
+          setLiveDriverLocation(rideData.driverId.currentLocation);
+        }
+      }
+
+      if (rideData.pickup?.coordinates && rideData.destination?.coordinates && !routeCoordinates) {
         const route = await fetchRoute(
           rideData.pickup.coordinates,
           rideData.destination.coordinates
@@ -87,30 +96,58 @@ const RideTracking = () => {
     }
   }, [rideId]);
 
-  // Initial fetch
   useEffect(() => {
     fetchRide();
   }, [fetchRide]);
 
-  // Poll for status updates every 5 seconds if ride is active
+  // ─── Socket: real-time status updates ──────────────────────────────────
+  const handleStatusChange = useCallback((data) => {
+    setRideStatus(data.status);
+
+    // Update driver info if provided
+    if (data.driver) {
+      setDriverInfo((prev) => ({ ...prev, userId: data.driver }));
+    }
+
+    // Add to status history
+    setStatusHistory((prev) => [
+      { status: data.status, message: data.message, time: new Date() },
+      ...prev,
+    ]);
+
+    // If completed or cancelled, re-fetch full ride data
+    if (['completed', 'cancelled'].includes(data.status)) {
+      fetchRide();
+    }
+  }, [fetchRide]);
+
+  const handleDriverLocationUpdate = useCallback((location) => {
+    setLiveDriverLocation(location);
+  }, []);
+
+  // Register socket listeners
+  useRiderSocket(rideId, handleDriverLocationUpdate, handleStatusChange);
+
+  // Poll every 8 seconds as fallback (in case socket drops)
   useEffect(() => {
     const activeStatuses = ['pending', 'accepted', 'en_route', 'started'];
-    if (!ride || !activeStatuses.includes(ride.status)) return;
+    if (!rideStatus || !activeStatuses.includes(rideStatus)) return;
 
-    const interval = setInterval(() => {
-      fetchRide();
-    }, 5000);
-
+    const interval = setInterval(fetchRide, 8000);
     return () => clearInterval(interval);
-  }, [ride?.status, fetchRide]);
+  }, [rideStatus, fetchRide]);
 
   const handleCancel = async () => {
     setCancelLoading(true);
     setCancelError('');
     try {
+      // Cancel via REST API
       await cancelRideApi(rideId, cancelReason || 'Cancelled by rider');
+      // Also emit via socket to notify driver instantly
+      emitCancelRide(rideId, cancelReason || 'Cancelled by rider');
       setCancelModalOpen(false);
-      fetchRide(); // refresh ride state
+      setRideStatus('cancelled');
+      fetchRide();
     } catch (err) {
       setCancelError(err.response?.data?.error || 'Failed to cancel ride.');
     } finally {
@@ -125,7 +162,7 @@ const RideTracking = () => {
       <div className="card" style={{ textAlign: 'center', padding: 40 }}>
         <div style={{ fontSize: '2.5rem', marginBottom: 12 }}>⚠️</div>
         <h3>{error}</h3>
-        <Button variant="primary" onClick={() => navigate('/rider')} className="" style={{ marginTop: 16 }}>
+        <Button variant="primary" onClick={() => navigate('/rider')} style={{ marginTop: 16 }}>
           Back to Dashboard
         </Button>
       </div>
@@ -134,37 +171,37 @@ const RideTracking = () => {
 
   if (!ride) return null;
 
-  const statusInfo = STATUS_INFO[ride.status] || STATUS_INFO.pending;
-  const driver = ride.driverId;
+  const statusInfo = STATUS_INFO[rideStatus] || STATUS_INFO.pending;
+  const driver = driverInfo;
   const driverUser = driver?.userId;
-  const canCancel = ['pending', 'accepted', 'en_route'].includes(ride.status);
-  const isFinished = ['completed', 'cancelled'].includes(ride.status);
+  const canCancel = ['pending', 'accepted', 'en_route'].includes(rideStatus);
+  const isFinished = ['completed', 'cancelled'].includes(rideStatus);
 
   return (
     <div>
       {/* Header */}
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
+      <div
+        className="page-header"
+        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}
+      >
         <div>
           <h2 className="page-title">Ride Tracking</h2>
           <p className="page-subtitle" style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>
             ID: {ride._id}
           </p>
         </div>
-        <Badge status={ride.status} />
+        <Badge status={rideStatus} />
       </div>
 
       <div className="tracking-grid">
 
         {/* ─── Left panel ────────────────────────────────────── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
           {/* Status card */}
           <div
             className="card"
-            style={{
-              borderLeft: `4px solid ${statusInfo.color}`,
-              padding: '16px 20px',
-            }}
+            style={{ borderLeft: `4px solid ${statusInfo.color}`, padding: '16px 20px' }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
               <span style={{ fontSize: '1.5rem' }}>{statusInfo.icon}</span>
@@ -172,8 +209,8 @@ const RideTracking = () => {
             </div>
             <p style={{ margin: 0, fontSize: '0.85rem' }}>{statusInfo.desc}</p>
 
-            {/* Live pulse indicator for active rides */}
-            {['pending', 'accepted', 'en_route'].includes(ride.status) && (
+            {/* Live pulse for active rides */}
+            {['pending', 'accepted', 'en_route'].includes(rideStatus) && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 10 }}>
                 <span
                   style={{
@@ -186,11 +223,31 @@ const RideTracking = () => {
                   }}
                 />
                 <span style={{ fontSize: '0.78rem', color: 'var(--color-success)', fontWeight: 600 }}>
-                  Live — updating every 5s
+                  Live updates via Socket.IO
                 </span>
               </div>
             )}
           </div>
+
+          {/* Status history */}
+          {statusHistory.length > 0 && (
+            <div className="card" style={{ padding: '14px 16px' }}>
+              <h4 style={{ marginBottom: 10, fontSize: '0.875rem' }}>Status Updates</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {statusHistory.map((h, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                    <Badge status={h.status} />
+                    <div>
+                      <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 500 }}>{h.message}</p>
+                      <p style={{ margin: 0, fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
+                        {h.time.toLocaleTimeString()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Route card */}
           <div className="card">
@@ -200,68 +257,31 @@ const RideTracking = () => {
                 <span style={{ fontSize: '1.1rem', flexShrink: 0, marginTop: 2 }}>🟢</span>
                 <div>
                   <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>PICKUP</p>
-                  <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 500 }}>
-                    {ride.pickup?.address}
-                  </p>
+                  <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 500 }}>{ride.pickup?.address}</p>
                 </div>
               </div>
-              <div
-                style={{
-                  borderLeft: '2px dashed var(--color-border)',
-                  marginLeft: 11,
-                  height: 16,
-                }}
-              />
+              <div style={{ borderLeft: '2px dashed var(--color-border)', marginLeft: 11, height: 16 }} />
               <div style={{ display: 'flex', gap: 10 }}>
                 <span style={{ fontSize: '1.1rem', flexShrink: 0, marginTop: 2 }}>🔴</span>
                 <div>
                   <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>DESTINATION</p>
-                  <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 500 }}>
-                    {ride.destination?.address}
-                  </p>
+                  <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 500 }}>{ride.destination?.address}</p>
                 </div>
               </div>
             </div>
-
-            {/* Trip meta */}
-            <div
-              style={{
-                display: 'flex',
-                gap: 12,
-                marginTop: 14,
-                paddingTop: 14,
-                borderTop: '1px solid var(--color-border)',
-                fontSize: '0.82rem',
-                color: 'var(--color-text-secondary)',
-                flexWrap: 'wrap',
-              }}
-            >
+            <div style={{ display: 'flex', gap: 12, marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--color-border)', fontSize: '0.82rem', color: 'var(--color-text-secondary)', flexWrap: 'wrap' }}>
               {ride.distanceKm && <span>📏 {ride.distanceKm} km</span>}
               {ride.durationMin && <span>⏱ {formatDuration(ride.durationMin)}</span>}
               <span>💰 {formatCurrency(ride.finalFare || ride.fare)}</span>
             </div>
           </div>
 
-          {/* Driver card — only show when driver assigned */}
+          {/* Driver card */}
           {driver && driverUser && (
             <div className="card">
               <h4 style={{ marginBottom: 14 }}>Your Driver</h4>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                <div
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: '50%',
-                    background: 'var(--color-primary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#fff',
-                    fontWeight: 700,
-                    fontSize: '1.1rem',
-                    flexShrink: 0,
-                  }}
-                >
+                <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '1.1rem', flexShrink: 0 }}>
                   {driverUser?.name?.charAt(0).toUpperCase()}
                 </div>
                 <div>
@@ -288,7 +308,7 @@ const RideTracking = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
-                  {ride.status === 'completed' ? 'FINAL FARE' : 'ESTIMATED FARE'}
+                  {rideStatus === 'completed' ? 'FINAL FARE' : 'ESTIMATED FARE'}
                 </p>
                 <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
                   Booked {formatDateTime(ride.createdAt)}
@@ -303,43 +323,24 @@ const RideTracking = () => {
           {/* Action buttons */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {canCancel && (
-              <Button
-                variant="danger"
-                fullWidth
-                onClick={() => setCancelModalOpen(true)}
-              >
+              <Button variant="danger" fullWidth onClick={() => setCancelModalOpen(true)}>
                 Cancel Ride
               </Button>
             )}
-
-            {ride.status === 'completed' && (
-              <Button
-                variant="primary"
-                fullWidth
-                onClick={() => navigate(`/rider/review/${ride._id}`)}
-              >
+            {rideStatus === 'completed' && (
+              <Button variant="primary" fullWidth onClick={() => navigate(`/rider/review/${ride._id}`)}>
                 ⭐ Rate Driver
               </Button>
             )}
-
             {isFinished && (
-              <Button
-                variant="ghost"
-                fullWidth
-                onClick={() => navigate('/rider')}
-              >
-                ← Back to Dashboard
-              </Button>
-            )}
-
-            {isFinished && (
-              <Button
-                variant="secondary"
-                fullWidth
-                onClick={() => navigate('/rider/book')}
-              >
-                Book Another Ride
-              </Button>
+              <>
+                <Button variant="ghost" fullWidth onClick={() => navigate('/rider')}>
+                  ← Back to Dashboard
+                </Button>
+                <Button variant="secondary" fullWidth onClick={() => navigate('/rider/book')}>
+                  Book Another Ride
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -349,12 +350,10 @@ const RideTracking = () => {
           <TrackingMap
             pickup={ride.pickup}
             destination={ride.destination}
-            driverLocation={driver?.currentLocation?.lat ? driver.currentLocation : null}
+            driverLocation={liveDriverLocation}
             routeCoordinates={routeCoordinates}
-            height="420px"
+            height="540px"
           />
-
-          {/* Legend */}
           <div
             style={{
               display: 'flex',
@@ -371,12 +370,12 @@ const RideTracking = () => {
           >
             <span>🟢 Pickup</span>
             <span>🔴 Destination</span>
-            <span>🚗 Driver</span>
+            <span>🚗 Driver (live)</span>
           </div>
         </div>
       </div>
 
-      {/* ─── Cancel Modal ─────────────────────────────────────── */}
+      {/* Cancel Modal */}
       <Modal
         isOpen={cancelModalOpen}
         onClose={() => { setCancelModalOpen(false); setCancelError(''); }}
@@ -384,9 +383,8 @@ const RideTracking = () => {
         size="sm"
       >
         <p style={{ marginBottom: 16, fontSize: '0.9rem' }}>
-          Are you sure you want to cancel this ride? This action cannot be undone.
+          Are you sure you want to cancel this ride?
         </p>
-
         <div className="form-group">
           <label className="input-label">Reason (optional)</label>
           <input
@@ -396,43 +394,21 @@ const RideTracking = () => {
             onChange={(e) => setCancelReason(e.target.value)}
           />
         </div>
-
         {cancelError && (
-          <div
-            style={{
-              background: '#fee2e2',
-              border: '1px solid #fecaca',
-              borderRadius: 8,
-              padding: '10px 12px',
-              marginBottom: 12,
-              fontSize: '0.85rem',
-              color: '#991b1b',
-            }}
-          >
+          <div style={{ background: '#fee2e2', border: '1px solid #fecaca', borderRadius: 8, padding: '10px 12px', marginBottom: 12, fontSize: '0.85rem', color: '#991b1b' }}>
             {cancelError}
           </div>
         )}
-
         <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-          <Button
-            variant="ghost"
-            fullWidth
-            onClick={() => { setCancelModalOpen(false); setCancelError(''); }}
-          >
+          <Button variant="ghost" fullWidth onClick={() => { setCancelModalOpen(false); setCancelError(''); }}>
             Keep Ride
           </Button>
-          <Button
-            variant="danger"
-            fullWidth
-            loading={cancelLoading}
-            onClick={handleCancel}
-          >
+          <Button variant="danger" fullWidth loading={cancelLoading} onClick={handleCancel}>
             Yes, Cancel
           </Button>
         </div>
       </Modal>
 
-      {/* Pulse animation */}
       <style>{`
         @keyframes pulse {
           0%, 100% { opacity: 1; transform: scale(1); }

@@ -1,6 +1,8 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { setCredentials, logout, setError, clearError, updateUser } from '../store/authSlice';
 import { loginApi, registerApi, logoutApi } from '../api/authApi';
+import { disconnectSocket } from '../socket/socket';
+
 
 const useAuth = () => {
   const dispatch = useDispatch();
@@ -40,6 +42,7 @@ const useAuth = () => {
     } catch {
       // fail silently
     } finally {
+      disconnectSocket();
       dispatch(logout());
     }
   };

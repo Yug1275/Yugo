@@ -13,11 +13,14 @@ import {
 } from '../../utils/mapHelpers';
 import { createRideApi, getNearbyDriversApi } from '../../api/rideApi';
 import { formatCurrency } from '../../utils/helpers';
+import { useRideEmitter } from '../../hooks/useRideSocket';
+
 
 const STEPS = { SELECT: 'select', CONFIRM: 'confirm' };
 
 const BookRide = () => {
   const navigate = useNavigate();
+  const { emitNewRide } = useRideEmitter();
   const { location: currentLocation, loading: geoLoading, error: geoError, getCurrentLocation } = useGeolocation();
 
   const [step, setStep] = useState(STEPS.SELECT);
@@ -86,22 +89,27 @@ const BookRide = () => {
   };
 
   const handleConfirmBooking = async () => {
-    setBookingLoading(true);
-    setBookingError('');
-    try {
-      const res = await createRideApi({
-        pickup,
-        destination,
-        fare: estimatedFare,
-        distanceKm: routeInfo?.distanceKm || null,
-        durationMin: routeInfo?.durationMin || null,
-      });
-      navigate(`/rider/tracking/${res.data.data._id}`);
-    } catch (err) {
-      setBookingError(err.response?.data?.error || 'Failed to book ride. Try again.');
-      setBookingLoading(false);
-    }
-  };
+  setBookingLoading(true);
+  setBookingError('');
+  try {
+    const res = await createRideApi({
+      pickup,
+      destination,
+      fare: estimatedFare,
+      distanceKm: routeInfo?.distanceKm || null,
+      durationMin: routeInfo?.durationMin || null,
+    });
+    const rideId = res.data.data._id;
+
+    // Notify drivers via socket
+    emitNewRide(rideId);
+
+    navigate(`/rider/tracking/${rideId}`);
+  } catch (err) {
+    setBookingError(err.response?.data?.error || 'Failed to book ride. Try again.');
+    setBookingLoading(false);
+  }
+};
 
   return (
     <div>

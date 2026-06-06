@@ -14,6 +14,19 @@ const {
 } = require('../controllers/driverController');
 const { protect, driverOnly, adminOnly } = require('../middleware/authMiddleware');
 
+const Driver = require('../models/Driver');
+const asyncHandler = require('../utils/asyncHandler');
+
+// TEMP — self approve for development, remove before Phase 15
+router.put('/approve-self', protect, driverOnly, asyncHandler(async (req, res) => {
+  const driver = await Driver.findOneAndUpdate(
+    { userId: req.user._id },
+    { isApproved: true },
+    { new: true }
+  );
+  res.json({ success: true, message: 'Approved', data: driver });
+}));
+
 // Public / Rider accessible
 router.get('/nearby', protect, getNearbyDrivers);
 router.get('/search', protect, adminOnly, searchDrivers);

@@ -8,6 +8,7 @@ import {
   acceptRideApi,
   updateLocationApi,
 } from '../../api/driverApi';
+import { useDriverSocket, useRideEmitter } from '../../hooks/useRideSocket';
 import {
   setDriverProfile,
   setAvailability,
@@ -28,6 +29,7 @@ const DriverDashboard = () => {
   const [availLoading, setAvailLoading] = useState(false);
   const [acceptingId, setAcceptingId] = useState(null);
   const [pendingLoading, setPendingLoading] = useState(false);
+  const { emitAcceptRide } = useRideEmitter();
 
   // Load driver profile on mount
   useEffect(() => {
@@ -60,22 +62,45 @@ const DriverDashboard = () => {
   }, []);
 
   // Poll pending rides every 10s if online
-  useEffect(() => {
-    if (!availability) return;
+  const { emitLocationUpdate } = useRideEmitter();
 
-    const fetchPending = async () => {
-      setPendingLoading(true);
-      try {
-        const res = await getPendingRidesApi();
-        dispatch(setPendingRides(res.data.data || []));
-      } catch { /* silent */ }
-      finally { setPendingLoading(false); }
-    };
+useEffect(() => {
+  if (!availability) return;
 
-    fetchPending();
-    const interval = setInterval(fetchPending, 10000);
-    return () => clearInterval(interval);
-  }, [availability]);
+  const sendLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        try { await updateLocationApi(lat, lng); } catch { /* silent */ }
+        emitLocationUpdate(lat, lng, null);
+      });
+    }
+  };
+
+  sendLocation();
+  const interval = setInterval(sendLocation, 10000);
+  return () => clearInterval(interval);
+}, [availability, emitLocationUpdate]);
+
+  // Socket: listen for new ride requests in real time
+  useDriverSocket(
+    // onNewRide — add to pending list
+    (newRide) => {
+      console.log('New ride received via socket (component):', newRide?.rideId || newRide);
+      // Build new pending rides array from current selector value to avoid function payload
+      const exists = Array.isArray(pendingRides) && pendingRides.some((r) => r._id?.toString() === newRide.rideId?.toString());
+      if (!exists) {
+        dispatch(setPendingRides([{ ...newRide, _id: newRide.rideId }, ...(Array.isArray(pendingRides) ? pendingRides : [])]));
+      }
+    },
+    // onRideTakenOff — remove from pending list
+    (takenRideId) => {
+      const newList = Array.isArray(pendingRides)
+        ? pendingRides.filter((r) => r._id?.toString() !== takenRideId?.toString())
+        : [];
+      dispatch(setPendingRides(newList));
+    }
+  );
 
   const handleToggleAvailability = async () => {
     setAvailLoading(true);
@@ -93,15 +118,17 @@ const DriverDashboard = () => {
   };
 
   const handleAcceptRide = async (rideId) => {
-    setAcceptingId(rideId);
-    try {
-      await acceptRideApi(rideId);
-      navigate(`/driver/rides/${rideId}`);
-    } catch (err) {
-      alert(err.response?.data?.error || 'Failed to accept ride');
-      setAcceptingId(null);
-    }
-  };
+  setAcceptingId(rideId);
+  try {
+    await acceptRideApi(rideId);
+    // Also emit via socket for instant notification to rider
+    emitAcceptRide(rideId);
+    navigate(`/driver/rides`);
+  } catch (err) {
+    alert(err.response?.data?.error || 'Failed to accept ride');
+    setAcceptingId(null);
+  }
+};
 
   if (loading) return <Loader text="Loading dashboard..." />;
 

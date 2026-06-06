@@ -44,9 +44,13 @@ const register = asyncHandler(async (req, res, next) => {
   });
 
   // If registering as driver, create a Driver profile as well
-  if (userRole === 'driver') {
-    await Driver.create({ userId: user._id });
-  }
+  // TEMP FIX — auto approve for development:
+if (userRole === 'driver') {
+  await Driver.create({
+    userId: user._id,
+    isApproved: true,   // ← add this
+  });
+}
 
   const token = generateToken(user._id, user.role);
 

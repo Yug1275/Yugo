@@ -65,6 +65,24 @@ const createRide = asyncHandler(async (req, res, next) => {
     status: 'pending',
   });
 
+  // ─── Notify all online drivers via Socket.IO ──────────────────────
+  const io = req.app.get('io');
+  if (io) {
+      console.log(`📡 Emitting ride:newRequest for ride ${ride._id} to all sockets`);
+    const populatedRide = await Ride.findById(ride._id)
+      .populate('riderId', 'name phone')
+      .lean();
+
+    io.emit('ride:newRequest', {
+      rideId: ride._id,
+      pickup: ride.pickup,
+      destination: ride.destination,
+      fare: ride.fare,
+      distanceKm: ride.distanceKm,
+      rider: populatedRide.riderId,
+    });
+  }
+
   return sendSuccess(res, 201, ride, 'Ride booked successfully');
 });
 
