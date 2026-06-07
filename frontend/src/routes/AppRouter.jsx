@@ -29,6 +29,10 @@ import CompleteDriverProfile from '../pages/driver/CompleteDriverProfile';
 // 404
 import NotFound from '../pages/NotFound';
 
+import Payment from '../pages/rider/Payment';
+import PaymentSuccess from '../pages/rider/PaymentSuccess';
+import PaymentHistory from '../pages/rider/PaymentHistory';
+
 const RoleRedirect = () => {
   const { isAuthenticated, user } = useAuth();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
@@ -72,6 +76,9 @@ const AppRouter = () => {
           <Route path="profile" element={<Profile />} />
           <Route path="locations" element={<SavedLocations />} />
           <Route path="search" element={<SearchPage />} />
+          <Route path="payment/:rideId" element={<Payment />} />
+          <Route path="payment-success/:rideId" element={<PaymentSuccess />} />
+          <Route path="payments" element={<PaymentHistory />} />
         </Route>
 
         {/* Driver routes */}

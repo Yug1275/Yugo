@@ -321,23 +321,41 @@ const RideTracking = () => {
           </div>
 
           {/* Action buttons */}
+          {/* Action buttons */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {canCancel && (
               <Button variant="danger" fullWidth onClick={() => setCancelModalOpen(true)}>
                 Cancel Ride
               </Button>
             )}
+
+            {/* ← Add this payment button */}
             {rideStatus === 'completed' && (
-              <Button variant="primary" fullWidth onClick={() => navigate(`/rider/review/${ride._id}`)}>
+              <Button
+                variant="primary"
+                fullWidth
+                onClick={() => navigate(`/rider/payment/${ride._id}`)}
+              >
+                💳 Pay Now — {formatCurrency(ride.finalFare || ride.fare)}
+              </Button>
+            )}
+
+            {rideStatus === 'completed' && (
+              <Button
+                variant="secondary"
+                fullWidth
+                onClick={() => navigate(`/rider/review/${ride._id}`)}
+              >
                 ⭐ Rate Driver
               </Button>
             )}
+
             {isFinished && (
               <>
                 <Button variant="ghost" fullWidth onClick={() => navigate('/rider')}>
                   ← Back to Dashboard
                 </Button>
-                <Button variant="secondary" fullWidth onClick={() => navigate('/rider/book')}>
+                <Button variant="ghost" fullWidth onClick={() => navigate('/rider/book')}>
                   Book Another Ride
                 </Button>
               </>
