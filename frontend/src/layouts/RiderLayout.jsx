@@ -8,6 +8,7 @@ const riderLinks = [
   { to: '/rider/book',               icon: '🚗', label: 'Book'      },
   { to: '/rider/history',            icon: '🕒', label: 'History'   },
   { to: '/rider/payments',           icon: '💳', label: 'Payments' },
+  { to: '/rider/reviews',            icon: '⭐', label: 'Reviews'  },
   { to: '/rider/search',             icon: '🔍', label: 'Search'    },
   { to: '/rider/profile',            icon: '👤', label: 'Profile'   },
   { to: '/rider/locations',          icon: '📍', label: 'Saved'     },

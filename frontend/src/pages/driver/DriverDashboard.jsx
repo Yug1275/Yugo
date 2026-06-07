@@ -18,6 +18,8 @@ import Loader from '../../components/common/Loader';
 import Badge from '../../components/common/Badge';
 import useAuth from '../../hooks/useAuth';
 import { formatCurrency, formatDateTime } from '../../utils/helpers';
+import { getDriverReviewsApi } from '../../api/reviewApi';
+import StarRating from '../../components/common/StarRating';
 
 const DriverDashboard = () => {
   const navigate = useNavigate();
@@ -30,6 +32,7 @@ const DriverDashboard = () => {
   const [acceptingId, setAcceptingId] = useState(null);
   const [pendingLoading, setPendingLoading] = useState(false);
   const { emitAcceptRide } = useRideEmitter();
+  const [recentReviews, setRecentReviews] = useState([]);
 
   // Load driver profile on mount
   useEffect(() => {
@@ -47,8 +50,10 @@ const DriverDashboard = () => {
         // Auto-update location if available
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(async (pos) => {
+            // Fetch recent reviews
             try {
-              await updateLocationApi(pos.coords.latitude, pos.coords.longitude);
+              const reviewRes = await getDriverReviewsApi(res.data.data.driver._id, { limit: 3 });
+              setRecentReviews(reviewRes.data.data || []);
             } catch { /* silent */ }
           });
         }
@@ -64,23 +69,23 @@ const DriverDashboard = () => {
   // Poll pending rides every 10s if online
   const { emitLocationUpdate } = useRideEmitter();
 
-useEffect(() => {
-  if (!availability) return;
+  useEffect(() => {
+    if (!availability) return;
 
-  const sendLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(async (pos) => {
-        const { latitude: lat, longitude: lng } = pos.coords;
-        try { await updateLocationApi(lat, lng); } catch { /* silent */ }
-        emitLocationUpdate(lat, lng, null);
-      });
-    }
-  };
+    const sendLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+          const { latitude: lat, longitude: lng } = pos.coords;
+          try { await updateLocationApi(lat, lng); } catch { /* silent */ }
+          emitLocationUpdate(lat, lng, null);
+        });
+      }
+    };
 
-  sendLocation();
-  const interval = setInterval(sendLocation, 10000);
-  return () => clearInterval(interval);
-}, [availability, emitLocationUpdate]);
+    sendLocation();
+    const interval = setInterval(sendLocation, 10000);
+    return () => clearInterval(interval);
+  }, [availability, emitLocationUpdate]);
 
   // Socket: listen for new ride requests in real time
   useDriverSocket(
@@ -118,17 +123,17 @@ useEffect(() => {
   };
 
   const handleAcceptRide = async (rideId) => {
-  setAcceptingId(rideId);
-  try {
-    await acceptRideApi(rideId);
-    // Also emit via socket for instant notification to rider
-    emitAcceptRide(rideId);
-    navigate(`/driver/rides`);
-  } catch (err) {
-    alert(err.response?.data?.error || 'Failed to accept ride');
-    setAcceptingId(null);
-  }
-};
+    setAcceptingId(rideId);
+    try {
+      await acceptRideApi(rideId);
+      // Also emit via socket for instant notification to rider
+      emitAcceptRide(rideId);
+      navigate(`/driver/rides`);
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to accept ride');
+      setAcceptingId(null);
+    }
+  };
 
   if (loading) return <Loader text="Loading dashboard..." />;
 
@@ -355,6 +360,38 @@ useEffect(() => {
           </div>
         )}
       </div>
+
+      {/* Recent reviews */}
+      {recentReviews.length > 0 && (
+        <div className="card" style={{ marginTop: 20 }}>
+          <h4 style={{ marginBottom: 14 }}>Recent Reviews</h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {recentReviews.map((review) => (
+              <div
+                key={review._id}
+                style={{
+                  padding: '12px 14px',
+                  background: 'var(--color-surface-2)',
+                  borderRadius: 8,
+                  border: '1px solid var(--color-border)',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>
+                    {review.riderId?.name || 'Rider'}
+                  </span>
+                  <StarRating value={review.rating} readonly size="sm" showLabel={false} />
+                </div>
+                {review.comment && (
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--color-text-secondary)', fontStyle: 'italic' }}>
+                    "{review.comment}"
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -53,7 +53,7 @@ app.use('/api/drivers', require('./routes/driverRoutes'));
 app.use('/api/rides', require('./routes/rideRoutes'));
 app.use('/api/search',  require('./routes/searchRoutes')); 
 app.use('/api/payments', require('./routes/paymentRoutes'));
-// app.use('/api/reviews', require('./routes/reviewRoutes'));
+app.use('/api/reviews', require('./routes/reviewRoutes'));
 // app.use('/api/notifications', require('./routes/notificationRoutes'));
 // app.use('/api/search', require('./routes/searchRoutes'));
 

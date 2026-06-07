@@ -33,6 +33,9 @@ import Payment from '../pages/rider/Payment';
 import PaymentSuccess from '../pages/rider/PaymentSuccess';
 import PaymentHistory from '../pages/rider/PaymentHistory';
 
+import ReviewDriver from '../pages/rider/ReviewDriver';
+import MyReviews from '../pages/rider/MyReviews';
+
 const RoleRedirect = () => {
   const { isAuthenticated, user } = useAuth();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
@@ -79,6 +82,8 @@ const AppRouter = () => {
           <Route path="payment/:rideId" element={<Payment />} />
           <Route path="payment-success/:rideId" element={<PaymentSuccess />} />
           <Route path="payments" element={<PaymentHistory />} />
+          <Route path="review/:rideId" element={<ReviewDriver />} />
+          <Route path="reviews" element={<MyReviews />} />
         </Route>
 
         {/* Driver routes */}
