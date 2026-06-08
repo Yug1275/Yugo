@@ -7,6 +7,7 @@ import { createSocket, disconnectSocket } from './socket/socket';
 // Initialize/cleanup socket based on auth state
 const SocketManager = () => {
   const token = useSelector((state) => state.auth.token);
+  const isAuthenticated = useSelector((s) => s.auth.isAuthenticated);
 
   useEffect(() => {
     if (token) {
@@ -15,6 +16,13 @@ const SocketManager = () => {
       disconnectSocket();
     }
   }, [token]);
+
+  // Request browser notification permission when user logs in
+  useEffect(() => {
+    if (isAuthenticated && 'Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, [isAuthenticated]);
 
   return null;
 };

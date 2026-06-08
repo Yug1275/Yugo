@@ -35,6 +35,8 @@ import PaymentHistory from '../pages/rider/PaymentHistory';
 
 import ReviewDriver from '../pages/rider/ReviewDriver';
 import MyReviews from '../pages/rider/MyReviews';
+import Notifications from '../pages/rider/Notifications';
+import DriverNotifications from '../pages/driver/DriverNotifications';
 
 const RoleRedirect = () => {
   const { isAuthenticated, user } = useAuth();
@@ -84,6 +86,7 @@ const AppRouter = () => {
           <Route path="payments" element={<PaymentHistory />} />
           <Route path="review/:rideId" element={<ReviewDriver />} />
           <Route path="reviews" element={<MyReviews />} />
+          <Route path="notifications" element={<Notifications />} />
         </Route>
 
         {/* Driver routes */}
@@ -99,6 +102,7 @@ const AppRouter = () => {
           <Route path="rides" element={<DriverRides />} />
           <Route path="earnings" element={<DriverEarnings />} />
           <Route path="profile" element={<DriverProfile />} />
+          <Route path="notifications" element={<DriverNotifications />} />
         </Route>
 
         {/* Admin routes — Phase 15 */}

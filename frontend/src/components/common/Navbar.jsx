@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import Logo from './Logo';
 import useTheme from '../../hooks/useTheme';
 import useAuth from '../../hooks/useAuth';
+import NotificationBell from './NotificationBell';
 
 const Navbar = () => {
   const { isDark, toggleTheme } = useTheme();
@@ -31,7 +32,31 @@ const Navbar = () => {
 
         {isAuthenticated ? (
           <>
-            {/* Name — hidden on very small screens */}
+            {/* Notification Bell */}
+            <NotificationBell />
+
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              title="Toggle theme"
+              style={{
+                background: 'var(--color-surface-2)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 8,
+                width: 36,
+                height: 36,
+                cursor: 'pointer',
+                fontSize: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              {isDark ? '☀️' : '🌙'}
+            </button>
+
+            {/* Name */}
             <span
               style={{
                 fontSize: '0.82rem',
@@ -46,27 +71,6 @@ const Navbar = () => {
             >
               {user?.name}
             </span>
-
-            {/* Theme toggle */}
-        <button
-          onClick={toggleTheme}
-          title="Toggle theme"
-          style={{
-            background: 'var(--color-surface-2)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 8,
-            width: 36,
-            height: 36,
-            cursor: 'pointer',
-            fontSize: '1rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}
-        >
-          {isDark ? '☀️' : '🌙'}
-        </button>
             <button
               className="btn btn-ghost btn-sm"
               onClick={logout}
@@ -86,4 +90,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default Navbar;

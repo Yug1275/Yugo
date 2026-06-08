@@ -1,6 +1,7 @@
 const Driver = require('../models/Driver');
 const Ride = require('../models/Ride');
 const socketAuthMiddleware = require('./socketMiddleware');
+const { sendNotification } = require('../utils/notificationHelper');
 
 // Store connected users: userId → socketId
 const connectedUsers = new Map();
@@ -89,7 +90,7 @@ const initSocket = (io) => {
 
         await Driver.findByIdAndUpdate(driver._id, { availability: false });
 
-        // Notify the rider
+        // Notify the rider — socket update + persisted notification
         io.to(`user:${ride.riderId.toString()}`).emit('ride:statusUpdate', {
           rideId,
           status: 'accepted',
@@ -101,6 +102,16 @@ const initSocket = (io) => {
           },
           message: 'Driver accepted your ride!',
         });
+
+        // Save notification to DB
+        await sendNotification(
+          io,
+          ride.riderId.toString(),
+          '🚗 Driver is on the way!',
+          `${driver.userId.name} accepted your ride and is heading to your pickup.`,
+          'ride_update',
+          ride._id
+        );
 
         // Confirm to driver
         socket.emit('ride:acceptedConfirm', { rideId, message: 'Ride accepted successfully' });
@@ -155,6 +166,15 @@ const initSocket = (io) => {
           message: "Your ride has started. Enjoy the trip!",
         });
 
+        await sendNotification(
+          io,
+          ride.riderId.toString(),
+          '🛣️ Ride Started!',
+          'Your ride has started. Enjoy the trip!',
+          'ride_update',
+          ride._id
+        );
+
         socket.emit('ride:startConfirm', { rideId });
       } catch (err) {
         console.error('ride:start error:', err.message);
@@ -191,6 +211,26 @@ const initSocket = (io) => {
           message: 'Ride completed! Please rate your driver.',
         });
 
+        // Persist notification for rider
+        await sendNotification(
+          io,
+          ride.riderId.toString(),
+          '✅ Ride Completed!',
+          `Your ride is complete. Total fare: ₹${ride.finalFare}. Please rate your driver.`,
+          'ride_update',
+          ride._id
+        );
+
+        // Persist notification for driver
+        await sendNotification(
+          io,
+          userId,
+          '💰 Earnings Credited!',
+          `Ride completed. ₹${ride.finalFare} has been added to your earnings.`,
+          'payment',
+          ride._id
+        );
+
         socket.emit('ride:completeConfirm', {
           rideId,
           earnings: ride.finalFare,
@@ -221,7 +261,7 @@ const initSocket = (io) => {
         ride.cancelReason = reason || 'Cancelled by rider';
         await ride.save();
 
-        // Notify driver if assigned
+        // Notify driver if assigned — socket + persisted notification
         if (ride.driverId) {
           const driver = await Driver.findById(ride.driverId);
           if (driver) {
@@ -230,6 +270,14 @@ const initSocket = (io) => {
               rideId,
               message: 'Rider cancelled the ride.',
             });
+            await sendNotification(
+              io,
+              driver.userId.toString(),
+              '❌ Ride Cancelled',
+              'The rider has cancelled this ride.',
+              'ride_update',
+              ride._id
+            );
           }
         }
 

@@ -4,14 +4,15 @@ import Navbar from '../components/common/Navbar';
 import useAuth from '../hooks/useAuth';
 
 const riderLinks = [
-  { to: '/rider',           end: true, icon: '🏠', label: 'Home'      },
-  { to: '/rider/book',               icon: '🚗', label: 'Book'      },
-  { to: '/rider/history',            icon: '🕒', label: 'History'   },
-  { to: '/rider/payments',           icon: '💳', label: 'Payments' },
-  { to: '/rider/reviews',            icon: '⭐', label: 'Reviews'  },
-  { to: '/rider/search',             icon: '🔍', label: 'Search'    },
-  { to: '/rider/profile',            icon: '👤', label: 'Profile'   },
-  { to: '/rider/locations',          icon: '📍', label: 'Saved'     },
+  { to: '/rider',               end: true, icon: '🏠', label: 'Home'          },
+  { to: '/rider/book',                     icon: '🚗', label: 'Book'          },
+  { to: '/rider/history',                  icon: '🕒', label: 'History'       },
+  { to: '/rider/payments',                 icon: '💳', label: 'Payments'      },
+  { to: '/rider/reviews',                  icon: '⭐', label: 'Reviews'       },
+  { to: '/rider/notifications',            icon: '🔔', label: 'Notifications' },
+  { to: '/rider/search',                   icon: '🔍', label: 'Search'        },
+  { to: '/rider/profile',                  icon: '👤', label: 'Profile'       },
+  { to: '/rider/locations',                icon: '📍', label: 'Saved'         },
 ];
 
 const RiderLayout = () => {

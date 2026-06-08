@@ -3,6 +3,7 @@ const Driver = require('../models/Driver');
 const asyncHandler = require('../utils/asyncHandler');
 const { AppError } = require('../middleware/errorHandler');
 const { sendSuccess, sendPaginated, getPagination } = require('../utils/responseHelper');
+const { sendNotification } = require('../utils/notificationHelper');
 
 const BASE_FARE = 30;
 const PER_KM = 12;
@@ -68,7 +69,7 @@ const createRide = asyncHandler(async (req, res, next) => {
   // ─── Notify all online drivers via Socket.IO ──────────────────────
   const io = req.app.get('io');
   if (io) {
-      console.log(`📡 Emitting ride:newRequest for ride ${ride._id} to all sockets`);
+    console.log(`📡 Emitting ride:newRequest for ride ${ride._id} to all sockets`);
     const populatedRide = await Ride.findById(ride._id)
       .populate('riderId', 'name phone')
       .lean();
@@ -81,6 +82,35 @@ const createRide = asyncHandler(async (req, res, next) => {
       distanceKm: ride.distanceKm,
       rider: populatedRide.riderId,
     });
+
+    // Create persistent notification for the rider
+    await sendNotification(
+      io,
+      ride.riderId.toString(),
+      '🚕 Booking Requested',
+      'Looking for nearby drivers...',
+      'ride_update',
+      ride._id
+    );
+
+    // Notify online available drivers
+    try {
+      const onlineDrivers = await Driver.find({ availability: true }).populate('userId');
+      for (const driver of onlineDrivers) {
+        if (driver.userId?._id) {
+          await sendNotification(
+            io,
+            driver.userId._id.toString(),
+            '🔔 New Ride Available',
+            `New ride request from ${pickup.address} to ${destination.address}`,
+            'ride_update',
+            ride._id
+          );
+        }
+      }
+    } catch (err) {
+      console.error('Failed to send driver booking notifications:', err.message);
+    }
   }
 
   return sendSuccess(res, 201, ride, 'Ride booked successfully');
@@ -166,6 +196,28 @@ const cancelRide = asyncHandler(async (req, res, next) => {
   ride.cancelReason = req.body.reason || 'Cancelled by rider';
   await ride.save();
 
+  // Notify driver if assigned
+  if (ride.driverId) {
+    const driver = await Driver.findById(ride.driverId).select('userId').lean();
+    if (driver) {
+      const io = req.app.get('io');
+      if (io) {
+        io.to(`user:${driver.userId.toString()}`).emit('ride:cancelled', {
+          rideId: ride._id,
+          message: 'Rider cancelled the ride.',
+        });
+      }
+      await sendNotification(
+        io,
+        driver.userId.toString(),
+        '❌ Ride Cancelled',
+        `The rider has cancelled the ride. Reason: ${ride.cancelReason}`,
+        'ride_update',
+        ride._id
+      );
+    }
+  }
+
   return sendSuccess(res, 200, ride, 'Ride cancelled successfully');
 });
 
@@ -184,6 +236,38 @@ const acceptRide = asyncHandler(async (req, res, next) => {
   await ride.save();
 
   await Driver.findByIdAndUpdate(driver._id, { availability: false });
+
+  // ─── Socket notifications ──────────────────────────────────────────
+  const io = req.app.get('io');
+  if (io) {
+    const populatedDriver = await Driver.findById(driver._id).populate('userId', 'name phone');
+    
+    // Notify the rider via socket
+    io.to(`user:${ride.riderId.toString()}`).emit('ride:statusUpdate', {
+      rideId: ride._id,
+      status: 'accepted',
+      driver: {
+        id: driver._id,
+        name: populatedDriver.userId?.name || req.user.name,
+        phone: populatedDriver.userId?.phone || req.user.phone,
+        rating: driver.rating,
+      },
+      message: 'Driver accepted your ride!',
+    });
+
+    // Save notification to DB
+    await sendNotification(
+      io,
+      ride.riderId.toString(),
+      '🚗 Driver is on the way!',
+      `${populatedDriver.userId?.name || req.user.name} accepted your ride and is heading to your pickup.`,
+      'ride_update',
+      ride._id
+    );
+
+    // Broadcast to all drivers that this ride is no longer available
+    io.emit('ride:takenOff', { rideId: ride._id });
+  }
 
   return sendSuccess(res, 200, ride, 'Ride accepted');
 });
@@ -205,6 +289,25 @@ const startRide = asyncHandler(async (req, res, next) => {
   ride.status = 'started';
   ride.startTime = new Date();
   await ride.save();
+
+  // ─── Socket notifications ──────────────────────────────────────────
+  const io = req.app.get('io');
+  if (io) {
+    io.to(`user:${ride.riderId.toString()}`).emit('ride:statusUpdate', {
+      rideId: ride._id,
+      status: 'started',
+      message: 'Your ride has started. Enjoy the trip!',
+    });
+
+    await sendNotification(
+      io,
+      ride.riderId.toString(),
+      '🛣️ Ride Started!',
+      'Your ride has started. Enjoy the trip!',
+      'ride_update',
+      ride._id
+    );
+  }
 
   return sendSuccess(res, 200, ride, 'Ride started');
 });
@@ -233,6 +336,38 @@ const completeRide = asyncHandler(async (req, res, next) => {
     $inc: { totalRides: 1, totalEarnings: ride.finalFare },
     availability: true,
   });
+
+  // ─── Socket notifications ──────────────────────────────────────────
+  const io = req.app.get('io');
+  if (io) {
+    // Notify rider
+    io.to(`user:${ride.riderId.toString()}`).emit('ride:statusUpdate', {
+      rideId: ride._id,
+      status: 'completed',
+      finalFare: ride.finalFare,
+      message: 'Ride completed! Please rate your driver.',
+    });
+
+    // Persist notification for rider
+    await sendNotification(
+      io,
+      ride.riderId.toString(),
+      '✅ Ride Completed!',
+      `Your ride is complete. Total fare: ₹${ride.finalFare}. Please rate your driver.`,
+      'ride_update',
+      ride._id
+    );
+
+    // Persist notification for driver
+    await sendNotification(
+      io,
+      req.user._id.toString(),
+      '💰 Earnings Credited!',
+      `Ride completed. ₹${ride.finalFare} has been added to your earnings.`,
+      'payment',
+      ride._id
+    );
+  }
 
   return sendSuccess(res, 200, ride, 'Ride completed');
 });

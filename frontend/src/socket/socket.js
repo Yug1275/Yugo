@@ -7,7 +7,7 @@ let socket = null;
 // Create socket connection with auth token
 export const createSocket = (token) => {
   console.log('Creating socket connection to', SOCKET_URL, 'token?', !!token);
-  if (socket?.connected) return socket;
+  if (socket) return socket;
 
   socket = io(SOCKET_URL, {
     auth: { token },

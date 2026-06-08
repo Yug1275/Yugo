@@ -5,6 +5,7 @@ const Ride = require('../models/Ride');
 const asyncHandler = require('../utils/asyncHandler');
 const { AppError } = require('../middleware/errorHandler');
 const { sendSuccess, sendPaginated, getPagination } = require('../utils/responseHelper');
+const { sendNotification } = require('../utils/notificationHelper');
 
 // ─── POST /api/payments/create-order ─────────────────────────────────────
 // Creates a Razorpay order for a completed ride
@@ -142,6 +143,17 @@ const verifyPayment = asyncHandler(async (req, res, next) => {
     return next(new AppError('Payment record not found', 404));
   }
 
+  // Notify rider of successful payment
+  const io = req.app.get('io');
+  await sendNotification(
+    io,
+    req.user._id.toString(),
+    '💳 Payment Successful!',
+    `Your payment of ₹${payment.amount} was successful via ${payment.method}.`,
+    'payment',
+    payment.rideId
+  );
+
   return sendSuccess(res, 200, {
     payment,
     message: 'Payment verified and completed successfully',
@@ -179,6 +191,17 @@ const recordCashPayment = asyncHandler(async (req, res, next) => {
     status: 'completed',
     method: 'cash',
   });
+
+  // Notify rider of cash payment recorded/successful
+  const io = req.app.get('io');
+  await sendNotification(
+    io,
+    req.user._id.toString(),
+    '💳 Payment Successful!',
+    `Your cash payment of ₹${payment.amount} was recorded successfully.`,
+    'payment',
+    payment.rideId
+  );
 
   return sendSuccess(res, 201, { payment }, 'Cash payment recorded');
 });

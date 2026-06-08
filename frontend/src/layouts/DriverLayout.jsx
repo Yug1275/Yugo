@@ -3,10 +3,11 @@ import Navbar from '../components/common/Navbar';
 import useAuth from '../hooks/useAuth';
 
 const driverLinks = [
-  { to: '/driver',          end: true, icon: '🏠', label: 'Dashboard' },
-  { to: '/driver/rides',             icon: '🚗', label: 'Rides'     },
-  { to: '/driver/earnings',          icon: '💰', label: 'Earnings'  },
-  { to: '/driver/profile',           icon: '👤', label: 'Profile'   },
+  { to: '/driver',               end: true, icon: '🏠', label: 'Dashboard'    },
+  { to: '/driver/rides',                   icon: '🚗', label: 'Rides'        },
+  { to: '/driver/earnings',                icon: '💰', label: 'Earnings'     },
+  { to: '/driver/notifications',           icon: '🔔', label: 'Notifications'},
+  { to: '/driver/profile',                 icon: '👤', label: 'Profile'      },
 ];
 
 const DriverLayout = () => {
