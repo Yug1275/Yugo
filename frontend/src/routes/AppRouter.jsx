@@ -26,6 +26,15 @@ import DriverEarnings from '../pages/driver/DriverEarnings';
 import DriverProfile from '../pages/driver/DriverProfile';
 import CompleteDriverProfile from '../pages/driver/CompleteDriverProfile';
 
+// Admin
+import AdminLayout from '../layouts/AdminLayout';
+import AdminDashboard from '../pages/admin/AdminDashboard';
+import AdminUsers from '../pages/admin/AdminUsers';
+import AdminDrivers from '../pages/admin/AdminDrivers';
+import AdminRides from '../pages/admin/AdminRides';
+import AdminPayments from '../pages/admin/AdminPayments';
+import AdminAnalytics from '../pages/admin/AdminAnalytics';
+
 // 404
 import NotFound from '../pages/NotFound';
 
@@ -105,17 +114,22 @@ const AppRouter = () => {
           <Route path="notifications" element={<DriverNotifications />} />
         </Route>
 
-        {/* Admin routes — Phase 15 */}
+        {/* Admin routes */}
         <Route
-          path="/admin/*"
+          path="/admin"
           element={
             <ProtectedRoute allowedRoles={['admin']}>
-              <div className="page-container" style={{ paddingTop: 40 }}>
-                <h2>Admin Dashboard — Coming in Phase 15</h2>
-              </div>
+              <AdminLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="drivers" element={<AdminDrivers />} />
+          <Route path="rides" element={<AdminRides />} />
+          <Route path="payments" element={<AdminPayments />} />
+          <Route path="analytics" element={<AdminAnalytics />} />
+        </Route>
 
         <Route path="*" element={<NotFound />} />
       </Routes>
