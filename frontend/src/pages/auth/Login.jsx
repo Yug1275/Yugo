@@ -53,28 +53,57 @@ const Login = () => {
 
   return (
     <AuthLayout>
-      <div style={{ width: '100%', maxWidth: 440 }}>
-        <div className="card">
+      <div style={{ width: '100%', maxWidth: 440, animation: 'fadeIn 0.4s ease' }}>
+        {/* Form card */}
+        <div
+          className="card"
+          style={{
+            borderRadius: 20,
+            padding: 32,
+            boxShadow: '0 8px 40px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)',
+          }}
+        >
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 28 }}>
-            <h2 style={{ marginBottom: 6 }}>Welcome back</h2>
-            <p style={{ fontSize: '0.9rem' }}>Sign in to your YUGO account</p>
+            <div
+              style={{
+                width: 52,
+                height: 52,
+                borderRadius: 16,
+                background: 'var(--gradient-primary)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.4rem',
+                margin: '0 auto 16px',
+                boxShadow: '0 4px 16px rgba(37,99,235,0.3)',
+              }}
+            >
+              🚀
+            </div>
+            <h2 style={{ marginBottom: 6, letterSpacing: '-0.75px' }}>Welcome back</h2>
+            <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
+              Sign in to your YUGO account
+            </p>
           </div>
 
           {/* Server error */}
           {serverError && (
             <div
               style={{
-                background: '#fee2e2',
+                background: 'linear-gradient(135deg, #fee2e2, #fecaca)',
                 border: '1px solid #fecaca',
-                borderRadius: 8,
+                borderRadius: 10,
                 padding: '10px 14px',
                 marginBottom: 16,
                 fontSize: '0.875rem',
                 color: '#991b1b',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
               }}
             >
-              {serverError}
+              ⚠️ {serverError}
             </div>
           )}
 
@@ -106,7 +135,7 @@ const Login = () => {
             <div style={{ textAlign: 'right', marginTop: -8, marginBottom: 20 }}>
               <Link
                 to="/forgot-password"
-                style={{ fontSize: '0.82rem', color: 'var(--color-primary)' }}
+                style={{ fontSize: '0.82rem', color: 'var(--color-primary)', fontWeight: 600 }}
               >
                 Forgot password?
               </Link>
@@ -118,7 +147,7 @@ const Login = () => {
               fullWidth
               loading={loading}
             >
-              Sign In
+              Sign In →
             </Button>
           </form>
 
@@ -126,7 +155,7 @@ const Login = () => {
 
           <p style={{ textAlign: 'center', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
             Don't have an account?{' '}
-            <Link to="/register" style={{ fontWeight: 600, color: 'var(--color-primary)' }}>
+            <Link to="/register" style={{ fontWeight: 700, color: 'var(--color-primary)' }}>
               Create one
             </Link>
           </p>

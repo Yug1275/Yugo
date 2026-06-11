@@ -3,6 +3,8 @@ import { getRideAnalyticsApi, getRevenueAnalyticsApi } from '../../api/adminApi'
 import Loader from '../../components/common/Loader';
 import { formatCurrency } from '../../utils/helpers';
 
+const MEDALS = ['🥇', '🥈', '🥉'];
+
 const AdminAnalytics = () => {
   const [days, setDays] = useState(30);
   const [rideData, setRideData] = useState(null);
@@ -52,7 +54,7 @@ const AdminAnalytics = () => {
   const cashPercent = Math.round((cashInfo.count / totalTransactions) * 100);
 
   return (
-    <div>
+    <div style={{ animation: 'fadeIn 0.3s ease' }}>
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
         <div>
           <h2 className="page-title">Platform Analytics</h2>
@@ -70,18 +72,18 @@ const AdminAnalytics = () => {
         </select>
       </div>
 
+      {/* ── Charts row ── */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
         {/* Daily Rides Trend Chart */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-          <h4 style={{ marginBottom: 18, fontSize: '0.95rem', fontWeight: 600 }}>📈 Ride Activity Trend</h4>
+          <h4 style={{ marginBottom: 18, fontSize: '0.95rem', fontWeight: 700 }}>📈 Ride Activity Trend</h4>
           {dailyRides.length === 0 ? (
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 200, color: 'var(--color-text-muted)' }}>
               No ride data available for this range.
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
-              {/* Graphic container */}
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 180, paddingBottom: 10, borderBottom: '1.5px solid var(--color-border)' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 180, paddingBottom: 10, borderBottom: '1.5px solid var(--color-border)' }}>
                 {dailyRides.map((d, index) => {
                   const compHeight = (d.completed / maxRides) * 100;
                   const cancHeight = (d.cancelled / maxRides) * 100;
@@ -95,45 +97,46 @@ const AdminAnalytics = () => {
                         justifyContent: 'flex-end',
                         height: '100%',
                         position: 'relative',
+                        cursor: 'pointer',
                       }}
                       title={`${d.date} — Total: ${d.total} (Completed: ${d.completed}, Cancelled: ${d.cancelled})`}
+                      onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.75')}
+                      onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
                     >
                       <div
                         style={{
                           width: '100%',
-                          background: '#ef4444',
+                          background: 'linear-gradient(180deg, #f87171 0%, #ef4444 100%)',
                           height: `${cancHeight}%`,
-                          borderRadius: '2px 2px 0 0',
-                          transition: 'height 0.3s ease',
+                          borderRadius: '3px 3px 0 0',
+                          transition: 'height 0.3s ease, opacity 0.15s ease',
                         }}
                       />
                       <div
                         style={{
                           width: '100%',
-                          background: '#22c55e',
+                          background: 'linear-gradient(180deg, #4ade80 0%, #22c55e 100%)',
                           height: `${compHeight}%`,
-                          borderRadius: '2px 2px 0 0',
+                          borderRadius: '3px 3px 0 0',
                           transition: 'height 0.3s ease',
-                          marginTop: -2,
+                          marginTop: -1,
                         }}
                       />
                     </div>
                   );
                 })}
               </div>
-              {/* Labels */}
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 2px 0', fontSize: '0.68rem', color: 'var(--color-text-muted)' }}>
                 <span>{dailyRides[0]?.date}</span>
                 <span>Middle</span>
                 <span>{dailyRides[dailyRides.length - 1]?.date}</span>
               </div>
-              {/* Legend */}
               <div style={{ display: 'flex', gap: 16, marginTop: 14, fontSize: '0.75rem', justifyContent: 'center' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#22c55e' }} /> Completed
+                  <span style={{ width: 10, height: 10, borderRadius: 2, background: 'linear-gradient(#4ade80, #22c55e)', display: 'inline-block' }} /> Completed
                 </span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#ef4444' }} /> Cancelled
+                  <span style={{ width: 10, height: 10, borderRadius: 2, background: 'linear-gradient(#f87171, #ef4444)', display: 'inline-block' }} /> Cancelled
                 </span>
               </div>
             </div>
@@ -142,14 +145,14 @@ const AdminAnalytics = () => {
 
         {/* Daily Revenue Trend Chart */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-          <h4 style={{ marginBottom: 18, fontSize: '0.95rem', fontWeight: 600 }}>💰 Gross Revenue Trend</h4>
+          <h4 style={{ marginBottom: 18, fontSize: '0.95rem', fontWeight: 700 }}>💰 Gross Revenue Trend</h4>
           {dailyRevenue.length === 0 ? (
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 200, color: 'var(--color-text-muted)' }}>
               No transaction data available for this range.
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 180, paddingBottom: 10, borderBottom: '1.5px solid var(--color-border)' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 180, paddingBottom: 10, borderBottom: '1.5px solid var(--color-border)' }}>
                 {dailyRevenue.map((d, index) => {
                   const revHeight = (d.revenue / maxRevenue) * 100;
                   return (
@@ -161,13 +164,16 @@ const AdminAnalytics = () => {
                         justifyContent: 'flex-end',
                         height: '100%',
                         position: 'relative',
+                        cursor: 'pointer',
                       }}
                       title={`${d.date} — Revenue: ${formatCurrency(d.revenue)}`}
+                      onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.75')}
+                      onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
                     >
                       <div
                         style={{
                           width: '100%',
-                          background: '#3b82f6',
+                          background: 'linear-gradient(180deg, #60a5fa 0%, #2563eb 100%)',
                           height: `${revHeight}%`,
                           borderRadius: '4px 4px 0 0',
                           transition: 'height 0.3s ease',
@@ -184,7 +190,7 @@ const AdminAnalytics = () => {
               </div>
               <div style={{ display: 'flex', gap: 16, marginTop: 14, fontSize: '0.75rem', justifyContent: 'center' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#3b82f6' }} /> Revenue (INR)
+                  <span style={{ width: 10, height: 10, borderRadius: 2, background: 'linear-gradient(#60a5fa, #2563eb)', display: 'inline-block' }} /> Revenue (INR)
                 </span>
               </div>
             </div>
@@ -192,17 +198,18 @@ const AdminAnalytics = () => {
         </div>
       </div>
 
+      {/* ── Hourly + Payment row ── */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 24, marginBottom: 24 }}>
-        {/* Hourly Distribution (Peak Hours) */}
+        {/* Hourly Distribution */}
         <div className="card">
-          <h4 style={{ marginBottom: 18, fontSize: '0.95rem', fontWeight: 600 }}>⏰ Peak Traffic Hours (Daily Average)</h4>
+          <h4 style={{ marginBottom: 18, fontSize: '0.95rem', fontWeight: 700 }}>⏰ Peak Traffic Hours</h4>
           {hourlyRides.length === 0 ? (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 180, color: 'var(--color-text-muted)' }}>
               No traffic patterns found.
             </div>
           ) : (
             <div>
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 160, paddingBottom: 10, borderBottom: '1.5px solid var(--color-border)' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 160, paddingBottom: 10, borderBottom: '1.5px solid var(--color-border)' }}>
                 {hourlyRides.map((h, index) => {
                   const hourPercent = (h.rides / maxHourly) * 100;
                   return (
@@ -213,13 +220,16 @@ const AdminAnalytics = () => {
                         display: 'flex',
                         height: '100%',
                         justifyContent: 'flex-end',
+                        cursor: 'pointer',
                       }}
                       title={`${h.hour} — ${h.rides} rides`}
+                      onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.75')}
+                      onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
                     >
                       <div
                         style={{
                           width: '100%',
-                          background: '#8b5cf6',
+                          background: 'linear-gradient(180deg, #a78bfa 0%, #8b5cf6 100%)',
                           height: `${hourPercent}%`,
                           borderRadius: '2px 2px 0 0',
                           transition: 'height 0.3s ease',
@@ -243,33 +253,49 @@ const AdminAnalytics = () => {
         {/* Payment Methods Breakdown */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
-            <h4 style={{ marginBottom: 18, fontSize: '0.95rem', fontWeight: 600 }}>💳 Payment Methods Breakdown</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {/* Razorpay Progress */}
+            <h4 style={{ marginBottom: 18, fontSize: '0.95rem', fontWeight: 700 }}>💳 Payment Methods</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              {/* Razorpay */}
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: 4 }}>
-                  <span>Online Payments (Razorpay)</span>
-                  <span style={{ fontWeight: 700 }}>{razorpayPercent}%</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: 6 }}>
+                  <span style={{ fontWeight: 600 }}>💳 Online (Razorpay)</span>
+                  <span style={{ fontWeight: 800, color: 'var(--color-primary)' }}>{razorpayPercent}%</span>
                 </div>
                 <div style={{ height: 10, background: 'var(--color-border)', borderRadius: 5, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${razorpayPercent}%`, background: '#2563eb', borderRadius: 5 }} />
+                  <div
+                    style={{
+                      height: '100%',
+                      width: `${razorpayPercent}%`,
+                      background: 'linear-gradient(90deg, #60a5fa, #2563eb)',
+                      borderRadius: 5,
+                      transition: 'width 0.5s ease',
+                    }}
+                  />
                 </div>
-                <p style={{ margin: '4px 0 0', fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
-                  Total Collected: {formatCurrency(razorpayInfo.total)} ({razorpayInfo.count} bookings)
+                <p style={{ margin: '5px 0 0', fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
+                  {formatCurrency(razorpayInfo.total)} · {razorpayInfo.count} bookings
                 </p>
               </div>
 
-              {/* Cash Progress */}
+              {/* Cash */}
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: 4 }}>
-                  <span>Cash Payments</span>
-                  <span style={{ fontWeight: 700 }}>{cashPercent}%</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: 6 }}>
+                  <span style={{ fontWeight: 600 }}>💵 Cash</span>
+                  <span style={{ fontWeight: 800, color: '#22c55e' }}>{cashPercent}%</span>
                 </div>
                 <div style={{ height: 10, background: 'var(--color-border)', borderRadius: 5, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${cashPercent}%`, background: '#10b981', borderRadius: 5 }} />
+                  <div
+                    style={{
+                      height: '100%',
+                      width: `${cashPercent}%`,
+                      background: 'linear-gradient(90deg, #4ade80, #22c55e)',
+                      borderRadius: 5,
+                      transition: 'width 0.5s ease',
+                    }}
+                  />
                 </div>
-                <p style={{ margin: '4px 0 0', fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
-                  Total Collected: {formatCurrency(cashInfo.total)} ({cashInfo.count} bookings)
+                <p style={{ margin: '5px 0 0', fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
+                  {formatCurrency(cashInfo.total)} · {cashInfo.count} bookings
                 </p>
               </div>
             </div>
@@ -277,9 +303,9 @@ const AdminAnalytics = () => {
         </div>
       </div>
 
-      {/* Top Earning Drivers */}
+      {/* ── Top Earning Drivers ── */}
       <div className="card">
-        <h4 style={{ marginBottom: 16, fontSize: '0.95rem', fontWeight: 600 }}>🏆 Top Earning Drivers</h4>
+        <h4 style={{ marginBottom: 16, fontSize: '0.95rem', fontWeight: 700 }}>🏆 Top Earning Drivers</h4>
         {!revenueData?.topDrivers || revenueData.topDrivers.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--color-text-muted)' }}>
             No earnings records found.
@@ -296,28 +322,48 @@ const AdminAnalytics = () => {
                   padding: '12px 16px',
                   background: 'var(--color-surface-2)',
                   border: '1px solid var(--color-border)',
-                  borderRadius: 8,
+                  borderRadius: 12,
+                  transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                  cursor: 'default',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  {/* Rank badge */}
                   <div
                     style={{
-                      width: 28,
-                      height: 28,
+                      width: 34,
+                      height: 34,
                       borderRadius: '50%',
-                      background: index === 0 ? '#fbbf24' : index === 1 ? '#94a3b8' : index === 2 ? '#b45309' : 'var(--color-primary)',
-                      color: '#fff',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontWeight: 700,
-                      fontSize: '0.75rem',
+                      fontSize: index < 3 ? '1.1rem' : '0.8rem',
+                      background: index === 0
+                        ? 'linear-gradient(135deg, #fbbf24, #f59e0b)'
+                        : index === 1
+                        ? 'linear-gradient(135deg, #94a3b8, #64748b)'
+                        : index === 2
+                        ? 'linear-gradient(135deg, #cd7c3a, #b45309)'
+                        : 'var(--gradient-primary)',
+                      color: '#fff',
+                      boxShadow: index < 3 ? '0 2px 8px rgba(0,0,0,0.2)' : 'none',
                     }}
                   >
-                    {index + 1}
+                    {index < 3 ? MEDALS[index] : index + 1}
                   </div>
                   <div>
-                    <p style={{ margin: 0, fontWeight: 600, fontSize: '0.85rem', color: 'var(--color-text-primary)' }}>{d.name}</p>
+                    <p style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-text-primary)', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                      {d.name}
+                    </p>
                     <p style={{ margin: 0, fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
                       {d.email} · ⭐ {d.rating || 0}
                     </p>
@@ -325,11 +371,11 @@ const AdminAnalytics = () => {
                 </div>
 
                 <div style={{ textAlign: 'right' }}>
-                  <p style={{ margin: 0, fontWeight: 700, fontSize: '0.95rem', color: 'var(--color-success)' }}>
+                  <p style={{ margin: 0, fontWeight: 800, fontSize: '1rem', color: '#22c55e', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                     {formatCurrency(d.totalEarnings)}
                   </p>
                   <p style={{ margin: 0, fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
-                    {d.totalRides || 0} rides completed
+                    {d.totalRides || 0} rides
                   </p>
                 </div>
               </div>

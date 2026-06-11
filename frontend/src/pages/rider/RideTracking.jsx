@@ -16,36 +16,48 @@ const STATUS_INFO = {
     desc: 'Your ride request has been sent. Waiting for a driver to accept.',
     icon: '🔍',
     color: 'var(--color-warning)',
+    gradient: 'linear-gradient(135deg, #fef3c7, #fde68a)',
+    textColor: '#92400e',
   },
   accepted: {
     label: 'Driver accepted your ride',
     desc: 'A driver is on the way to your pickup point.',
     icon: '🚗',
     color: 'var(--color-primary)',
+    gradient: 'linear-gradient(135deg, #dbeafe, #bfdbfe)',
+    textColor: '#1e40af',
   },
   en_route: {
     label: 'Driver is nearby',
     desc: 'Your driver is almost at the pickup location.',
     icon: '📍',
     color: 'var(--color-primary)',
+    gradient: 'linear-gradient(135deg, #dbeafe, #bfdbfe)',
+    textColor: '#1e40af',
   },
   started: {
     label: 'Ride in progress',
     desc: "You're on your way! Sit back and relax.",
     icon: '🛣️',
     color: 'var(--color-success)',
+    gradient: 'linear-gradient(135deg, #dcfce7, #bbf7d0)',
+    textColor: '#166534',
   },
   completed: {
     label: 'Ride completed',
     desc: 'You have reached your destination. Hope you enjoyed the ride!',
     icon: '✅',
     color: 'var(--color-success)',
+    gradient: 'linear-gradient(135deg, #dcfce7, #bbf7d0)',
+    textColor: '#166534',
   },
   cancelled: {
     label: 'Ride cancelled',
     desc: 'This ride has been cancelled.',
     icon: '❌',
     color: 'var(--color-danger)',
+    gradient: 'linear-gradient(135deg, #fee2e2, #fecaca)',
+    textColor: '#991b1b',
   },
 };
 
@@ -104,18 +116,15 @@ const RideTracking = () => {
   const handleStatusChange = useCallback((data) => {
     setRideStatus(data.status);
 
-    // Update driver info if provided
     if (data.driver) {
       setDriverInfo((prev) => ({ ...prev, userId: data.driver }));
     }
 
-    // Add to status history
     setStatusHistory((prev) => [
       { status: data.status, message: data.message, time: new Date() },
       ...prev,
     ]);
 
-    // If completed or cancelled, re-fetch full ride data
     if (['completed', 'cancelled'].includes(data.status)) {
       fetchRide();
     }
@@ -141,9 +150,7 @@ const RideTracking = () => {
     setCancelLoading(true);
     setCancelError('');
     try {
-      // Cancel via REST API
       await cancelRideApi(rideId, cancelReason || 'Cancelled by rider');
-      // Also emit via socket to notify driver instantly
       emitCancelRide(rideId, cancelReason || 'Cancelled by rider');
       setCancelModalOpen(false);
       setRideStatus('cancelled');
@@ -176,9 +183,10 @@ const RideTracking = () => {
   const driverUser = driver?.userId;
   const canCancel = ['pending', 'accepted', 'en_route'].includes(rideStatus);
   const isFinished = ['completed', 'cancelled'].includes(rideStatus);
+  const isPending = rideStatus === 'pending';
 
   return (
-    <div>
+    <div style={{ animation: 'fadeIn 0.3s ease' }}>
       {/* Header */}
       <div
         className="page-header"
@@ -186,7 +194,7 @@ const RideTracking = () => {
       >
         <div>
           <h2 className="page-title">Ride Tracking</h2>
-          <p className="page-subtitle" style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>
+          <p className="page-subtitle" style={{ fontFamily: 'monospace', fontSize: '0.78rem' }}>
             ID: {ride._id}
           </p>
         </div>
@@ -201,28 +209,66 @@ const RideTracking = () => {
           {/* Status card */}
           <div
             className="card"
-            style={{ borderLeft: `4px solid ${statusInfo.color}`, padding: '16px 20px' }}
+            style={{
+              background: statusInfo.gradient,
+              border: `1.5px solid ${statusInfo.color}`,
+              padding: '18px 20px',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-              <span style={{ fontSize: '1.5rem' }}>{statusInfo.icon}</span>
-              <h4 style={{ margin: 0, color: statusInfo.color }}>{statusInfo.label}</h4>
-            </div>
-            <p style={{ margin: 0, fontSize: '0.85rem' }}>{statusInfo.desc}</p>
+            {/* Radar rings for pending */}
+            {isPending && (
+              <div style={{ position: 'absolute', top: 16, right: 20 }}>
+                <div style={{ position: 'relative', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {[0, 1, 2].map((i) => (
+                    <div
+                      key={i}
+                      style={{
+                        position: 'absolute',
+                        width: 40,
+                        height: 40,
+                        borderRadius: '50%',
+                        border: `2px solid ${statusInfo.color}`,
+                        animation: `pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) ${i * 0.5}s infinite`,
+                        opacity: 0.7,
+                      }}
+                    />
+                  ))}
+                  <span style={{ fontSize: '1rem', position: 'relative', zIndex: 1 }}>{statusInfo.icon}</span>
+                </div>
+              </div>
+            )}
 
-            {/* Live pulse for active rides */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+              {!isPending && <span style={{ fontSize: '1.5rem' }}>{statusInfo.icon}</span>}
+              <h4 style={{ margin: 0, color: statusInfo.textColor, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                {statusInfo.label}
+              </h4>
+            </div>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: statusInfo.textColor, opacity: 0.8 }}>
+              {statusInfo.desc}
+            </p>
+
+            {/* Live updates pulse indicator */}
             {['pending', 'accepted', 'en_route'].includes(rideStatus) && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 10 }}>
-                <span
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    background: 'var(--color-success)',
-                    display: 'inline-block',
-                    animation: 'pulse 1.5s infinite',
-                  }}
-                />
-                <span style={{ fontSize: '0.78rem', color: 'var(--color-success)', fontWeight: 600 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
+                <div style={{ display: 'flex', gap: 4 }}>
+                  {[0, 0.2, 0.4].map((delay, i) => (
+                    <span
+                      key={i}
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: '50%',
+                        background: '#22c55e',
+                        display: 'inline-block',
+                        animation: `bounce-dot 1.2s ease-in-out ${delay}s infinite`,
+                      }}
+                    />
+                  ))}
+                </div>
+                <span style={{ fontSize: '0.75rem', color: '#15803d', fontWeight: 700 }}>
                   Live updates via Socket.IO
                 </span>
               </div>
@@ -256,7 +302,7 @@ const RideTracking = () => {
               <div style={{ display: 'flex', gap: 10 }}>
                 <span style={{ fontSize: '1.1rem', flexShrink: 0, marginTop: 2 }}>🟢</span>
                 <div>
-                  <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>PICKUP</p>
+                  <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--color-text-muted)', fontWeight: 700 }}>PICKUP</p>
                   <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 500 }}>{ride.pickup?.address}</p>
                 </div>
               </div>
@@ -264,7 +310,7 @@ const RideTracking = () => {
               <div style={{ display: 'flex', gap: 10 }}>
                 <span style={{ fontSize: '1.1rem', flexShrink: 0, marginTop: 2 }}>🔴</span>
                 <div>
-                  <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>DESTINATION</p>
+                  <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--color-text-muted)', fontWeight: 700 }}>DESTINATION</p>
                   <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 500 }}>{ride.destination?.address}</p>
                 </div>
               </div>
@@ -272,55 +318,106 @@ const RideTracking = () => {
             <div style={{ display: 'flex', gap: 12, marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--color-border)', fontSize: '0.82rem', color: 'var(--color-text-secondary)', flexWrap: 'wrap' }}>
               {ride.distanceKm && <span>📏 {ride.distanceKm} km</span>}
               {ride.durationMin && <span>⏱ {formatDuration(ride.durationMin)}</span>}
-              <span>💰 {formatCurrency(ride.finalFare || ride.fare)}</span>
+              <span style={{ fontWeight: 700, color: 'var(--color-primary)' }}>💰 {formatCurrency(ride.finalFare || ride.fare)}</span>
             </div>
           </div>
 
           {/* Driver card */}
           {driver && driverUser && (
-            <div className="card">
-              <h4 style={{ marginBottom: 14 }}>Your Driver</h4>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '1.1rem', flexShrink: 0 }}>
-                  {driverUser?.name?.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <p style={{ margin: 0, fontWeight: 700 }}>{driverUser?.name}</p>
-                  <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
-                    ⭐ {driver.rating || 'N/A'} · {driver.totalRides || 0} rides
-                  </p>
-                </div>
+            <div className="card" style={{ overflow: 'hidden', padding: 0 }}>
+              <div
+                style={{
+                  background: 'var(--gradient-primary)',
+                  padding: '12px 16px',
+                }}
+              >
+                <h4 style={{ margin: 0, color: '#fff', fontSize: '0.875rem', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Your Driver</h4>
               </div>
-              {driverUser?.phone && (
-                <a
-                  href={`tel:${driverUser.phone}`}
-                  className="btn btn-ghost btn-sm btn-full"
-                  style={{ textDecoration: 'none', textAlign: 'center' }}
-                >
-                  📞 Call Driver
-                </a>
-              )}
+              <div style={{ padding: '14px 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                  <div
+                    style={{
+                      width: 52,
+                      height: 52,
+                      borderRadius: '50%',
+                      background: 'var(--gradient-primary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#fff',
+                      fontWeight: 800,
+                      fontSize: '1.2rem',
+                      flexShrink: 0,
+                      boxShadow: '0 4px 12px rgba(37,99,235,0.3)',
+                    }}
+                  >
+                    {driverUser?.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p style={{ margin: 0, fontWeight: 700, fontSize: '1rem', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                      {driverUser?.name}
+                    </p>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 4 }}>
+                      <span style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
+                        ⭐ {driver.rating || 'N/A'}
+                      </span>
+                      <span style={{ color: 'var(--color-border)' }}>·</span>
+                      <span style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
+                        {driver.totalRides || 0} rides
+                      </span>
+                    </div>
+                    {/* Rating bar visualization */}
+                    {driver.rating && (
+                      <div style={{ marginTop: 6, height: 4, background: 'var(--color-border)', borderRadius: 2, width: 80, overflow: 'hidden' }}>
+                        <div
+                          style={{
+                            height: '100%',
+                            width: `${(driver.rating / 5) * 100}%`,
+                            background: 'linear-gradient(90deg, #fbbf24, #f59e0b)',
+                            borderRadius: 2,
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {driverUser?.phone && (
+                  <a
+                    href={`tel:${driverUser.phone}`}
+                    className="btn btn-ghost btn-sm btn-full"
+                    style={{ textDecoration: 'none', textAlign: 'center' }}
+                  >
+                    📞 Call Driver
+                  </a>
+                )}
+              </div>
             </div>
           )}
 
           {/* Fare card */}
-          <div className="card">
+          <div
+            className="card"
+            style={{
+              background: 'var(--gradient-primary)',
+              border: 'none',
+              boxShadow: '0 4px 20px rgba(37,99,235,0.25)',
+            }}
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
+                <p style={{ margin: 0, fontSize: '0.75rem', color: 'rgba(255,255,255,0.75)', fontWeight: 700, letterSpacing: '0.5px' }}>
                   {rideStatus === 'completed' ? 'FINAL FARE' : 'ESTIMATED FARE'}
                 </p>
-                <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                <p style={{ margin: 0, fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', marginTop: 2 }}>
                   Booked {formatDateTime(ride.createdAt)}
                 </p>
               </div>
-              <span style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--color-primary)' }}>
+              <span style={{ fontSize: '2rem', fontWeight: 800, color: '#fff', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                 {formatCurrency(ride.finalFare || ride.fare)}
               </span>
             </div>
           </div>
 
-          {/* Action buttons */}
           {/* Action buttons */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {canCancel && (
@@ -329,7 +426,6 @@ const RideTracking = () => {
               </Button>
             )}
 
-            {/* ← Add this payment button */}
             {rideStatus === 'completed' && (
               <Button
                 variant="primary"
@@ -377,13 +473,14 @@ const RideTracking = () => {
               display: 'flex',
               gap: 16,
               marginTop: 10,
-              padding: '8px 12px',
+              padding: '10px 14px',
               background: 'var(--color-surface)',
-              borderRadius: 8,
+              borderRadius: 10,
               border: '1px solid var(--color-border)',
               fontSize: '0.78rem',
               color: 'var(--color-text-secondary)',
               flexWrap: 'wrap',
+              boxShadow: 'var(--shadow-sm)',
             }}
           >
             <span>🟢 Pickup</span>
@@ -426,13 +523,6 @@ const RideTracking = () => {
           </Button>
         </div>
       </Modal>
-
-      <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.5; transform: scale(1.4); }
-        }
-      `}</style>
     </div>
   );
 };

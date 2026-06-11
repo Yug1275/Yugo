@@ -10,6 +10,13 @@ const TYPE_ICONS = {
   system:      '🔔',
 };
 
+const TYPE_COLORS = {
+  ride_update: 'var(--color-primary)',
+  payment:     '#22c55e',
+  promo:       '#f59e0b',
+  system:      '#8b5cf6',
+};
+
 const NotificationBell = () => {
   const navigate = useNavigate();
   const { notifications, unreadCount, markRead, markAllRead, deleteOne, clearAll } = useNotifications();
@@ -48,7 +55,7 @@ const NotificationBell = () => {
           position: 'relative',
           background: 'var(--color-surface-2)',
           border: '1px solid var(--color-border)',
-          borderRadius: 8,
+          borderRadius: 10,
           width: 36,
           height: 36,
           cursor: 'pointer',
@@ -57,18 +64,27 @@ const NotificationBell = () => {
           alignItems: 'center',
           justifyContent: 'center',
           flexShrink: 0,
-          transition: 'background 0.15s ease',
+          transition: 'all 0.15s ease',
         }}
         title="Notifications"
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-1px)';
+          e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = 'none';
+        }}
       >
         🔔
         {unreadCount > 0 && (
           <span
+            className="badge-pulse"
             style={{
               position: 'absolute',
               top: -4,
               right: -4,
-              background: 'var(--color-danger)',
+              background: 'var(--gradient-primary)',
               color: '#fff',
               borderRadius: '50%',
               width: 18,
@@ -79,7 +95,7 @@ const NotificationBell = () => {
               alignItems: 'center',
               justifyContent: 'center',
               border: '2px solid var(--color-surface)',
-              animation: 'pulse 1.5s ease-in-out infinite',
+              boxShadow: '0 2px 6px rgba(37,99,235,0.4)',
             }}
           >
             {unreadCount > 9 ? '9+' : unreadCount}
@@ -90,21 +106,17 @@ const NotificationBell = () => {
       {/* Dropdown */}
       {open && (
         <div
+          className="notif-dropdown"
           style={{
             position: 'absolute',
             top: 44,
             right: 0,
             width: 340,
             maxHeight: 480,
-            background: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 12,
-            boxShadow: 'var(--shadow-lg)',
             zIndex: 200,
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
-            animation: 'fadeInDown 0.15s ease',
           }}
         >
           {/* Header */}
@@ -116,16 +128,17 @@ const NotificationBell = () => {
               padding: '14px 16px',
               borderBottom: '1px solid var(--color-border)',
               flexShrink: 0,
+              background: 'var(--color-surface-2)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <h4 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--color-text-primary)' }}>
+              <h4 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--color-text-primary)', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                 Notifications
               </h4>
               {unreadCount > 0 && (
                 <span
                   style={{
-                    background: 'var(--color-danger)',
+                    background: 'var(--gradient-primary)',
                     color: '#fff',
                     borderRadius: 20,
                     padding: '1px 8px',
@@ -179,7 +192,8 @@ const NotificationBell = () => {
                     gap: 10,
                     padding: '12px 14px',
                     borderBottom: '1px solid var(--color-border)',
-                    background: notif.read ? 'transparent' : 'var(--color-primary-light)',
+                    borderLeft: notif.read ? '3px solid transparent' : `3px solid ${TYPE_COLORS[notif.type] || 'var(--color-primary)'}`,
+                    background: notif.read ? 'transparent' : 'var(--color-primary-50)',
                     cursor: 'pointer',
                     transition: 'background 0.15s ease',
                     alignItems: 'flex-start',
@@ -190,7 +204,7 @@ const NotificationBell = () => {
                   onMouseLeave={(e) =>
                     (e.currentTarget.style.background = notif.read
                       ? 'transparent'
-                      : 'var(--color-primary-light)')
+                      : 'var(--color-primary-50)')
                   }
                 >
                   {/* Icon */}
@@ -199,13 +213,13 @@ const NotificationBell = () => {
                       width: 34,
                       height: 34,
                       borderRadius: '50%',
-                      background: 'var(--color-surface-2)',
+                      background: `${TYPE_COLORS[notif.type] || 'var(--color-primary)'}18`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontSize: '1rem',
                       flexShrink: 0,
-                      border: '1px solid var(--color-border)',
+                      border: `1px solid ${TYPE_COLORS[notif.type] || 'var(--color-primary)'}30`,
                     }}
                   >
                     {TYPE_ICONS[notif.type] || '🔔'}
@@ -265,7 +279,8 @@ const NotificationBell = () => {
                           width: 8,
                           height: 8,
                           borderRadius: '50%',
-                          background: 'var(--color-primary)',
+                          background: 'var(--gradient-primary)',
+                          boxShadow: '0 0 0 2px rgba(37,99,235,0.2)',
                         }}
                       />
                     )}
@@ -283,7 +298,10 @@ const NotificationBell = () => {
                         padding: 2,
                         lineHeight: 1,
                         opacity: 0.6,
+                        transition: 'opacity 0.15s ease',
                       }}
+                      onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+                      onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.6')}
                       title="Delete"
                     >
                       ×
@@ -303,6 +321,7 @@ const NotificationBell = () => {
                 display: 'flex',
                 justifyContent: 'space-between',
                 flexShrink: 0,
+                background: 'var(--color-surface-2)',
               }}
             >
               <button

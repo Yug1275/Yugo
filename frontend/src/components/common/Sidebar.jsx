@@ -4,49 +4,93 @@ import useAuth from '../../hooks/useAuth';
 const Sidebar = ({ links = [] }) => {
   const { user } = useAuth();
 
+  const initials = user?.name
+    ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
+    : '?';
+
   return (
     <>
     <aside
       className="desktop-sidebar responsive-sticky"
       style={{
         width: 240,
-        minHeight: 'calc(100vh - 64px)',
+        minHeight: 'calc(100vh - 67px)',
         background: 'var(--color-surface)',
         borderRight: '1px solid var(--color-border)',
-        padding: '24px 0',
+        padding: '20px 0',
         display: 'flex',
         flexDirection: 'column',
-        gap: 4,
+        gap: 2,
         position: 'sticky',
-        top: 64,
+        top: 67,
         flexShrink: 0,
       }}
     >
-      {/* User info */}
-      <div style={{ padding: '0 20px 20px', borderBottom: '1px solid var(--color-border)', marginBottom: 8 }}>
+      {/* User info — gradient header */}
+      <div
+        style={{
+          margin: '0 12px 16px',
+          background: 'var(--gradient-primary)',
+          borderRadius: 12,
+          padding: '14px 16px',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Background pattern */}
         <div
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: '50%',
-            background: 'var(--color-primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontWeight: 700,
-            fontSize: '0.9rem',
-            marginBottom: 8,
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.04) 20px, rgba(255,255,255,0.04) 40px)',
+            borderRadius: 12,
           }}
-        >
-          {user?.name?.charAt(0).toUpperCase()}
+        />
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 10 }}>
+          {/* Avatar with online indicator */}
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.2)',
+                border: '2px solid rgba(255,255,255,0.4)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#fff',
+                fontWeight: 700,
+                fontSize: '0.9rem',
+                backdropFilter: 'blur(8px)',
+              }}
+            >
+              {initials}
+            </div>
+            {/* Online dot */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                right: 0,
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                background: '#4ade80',
+                border: '2px solid transparent',
+                boxShadow: '0 0 0 2px rgba(74,222,128,0.3)',
+              }}
+            />
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <p style={{ margin: 0, fontWeight: 700, fontSize: '0.85rem', color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {user?.name}
+            </p>
+            <p style={{ margin: 0, fontSize: '0.7rem', color: 'rgba(255,255,255,0.7)', textTransform: 'capitalize' }}>
+              {user?.role}
+            </p>
+          </div>
         </div>
-        <p style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>
-          {user?.name}
-        </p>
-        <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', margin: 0, textTransform: 'capitalize' }}>
-          {user?.role}
-        </p>
       </div>
 
       {/* Nav links */}
@@ -61,21 +105,36 @@ const Sidebar = ({ links = [] }) => {
             gap: 10,
             padding: '10px 20px',
             fontSize: '0.875rem',
-            fontWeight: 500,
+            fontWeight: isActive ? 600 : 500,
             color: isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-            background: isActive ? 'var(--color-primary-light)' : 'transparent',
-            borderRight: isActive ? '3px solid var(--color-primary)' : '3px solid transparent',
+            background: isActive
+              ? 'linear-gradient(90deg, var(--color-primary-50), transparent)'
+              : 'transparent',
+            borderLeft: isActive ? '3px solid var(--color-primary)' : '3px solid transparent',
             textDecoration: 'none',
             transition: 'all 0.15s ease',
+            transform: 'translateX(0)',
           })}
+          onMouseEnter={(e) => {
+            if (!e.currentTarget.style.borderLeftColor?.includes('#2563')) {
+              e.currentTarget.style.transform = 'translateX(2px)';
+              e.currentTarget.style.background = 'var(--color-surface-2)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!e.currentTarget.style.borderLeftColor?.includes('#2563')) {
+              e.currentTarget.style.transform = 'translateX(0)';
+              e.currentTarget.style.background = 'transparent';
+            }
+          }}
         >
-          <span>{link.icon}</span>
+          <span style={{ fontSize: '1.1rem' }}>{link.icon}</span>
           <span>{link.label}</span>
         </NavLink>
       ))}
     </aside>
 
-    {/* Mobile bottom nav (rendered here so every layout with Sidebar gets a mobile nav) */}
+    {/* Mobile bottom nav */}
     <nav className="mobile-bottom-nav">
       {links.map((link) => (
         <NavLink

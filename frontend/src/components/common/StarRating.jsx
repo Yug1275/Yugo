@@ -10,9 +10,9 @@ const StarRating = ({
   const [hovered, setHovered] = useState(0);
 
   const sizes = {
-    sm: { star: '1.2rem', gap: 2 },
-    md: { star: '1.8rem', gap: 4 },
-    lg: { star: '2.4rem', gap: 6 },
+    sm: { star: '1.3rem', gap: 2 },
+    md: { star: '2rem', gap: 4 },
+    lg: { star: '2.6rem', gap: 6 },
   };
 
   const s = sizes[size] || sizes.md;
@@ -22,10 +22,11 @@ const StarRating = ({
     2: 'Poor',
     3: 'Average',
     4: 'Good',
-    5: 'Excellent',
+    5: 'Excellent ✨',
   };
 
   const displayValue = hovered || value;
+  const isFiveStars = !readonly && (hovered === 5 || value === 5);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -38,16 +39,15 @@ const StarRating = ({
             onClick={() => !readonly && onChange && onChange(star)}
             onMouseEnter={() => !readonly && setHovered(star)}
             onMouseLeave={() => !readonly && setHovered(0)}
+            className={`star-btn ${displayValue >= star ? 'selected' : ''} ${isFiveStars && displayValue >= star ? 'star-sparkle' : ''}`}
             style={{
-              background: 'none',
-              border: 'none',
-              cursor: readonly ? 'default' : 'pointer',
-              padding: 2,
               fontSize: s.star,
-              lineHeight: 1,
-              transition: 'transform 0.1s ease',
-              transform: !readonly && hovered >= star ? 'scale(1.2)' : 'scale(1)',
-              filter: displayValue >= star ? 'none' : 'grayscale(100%) opacity(0.3)',
+              cursor: readonly ? 'default' : 'pointer',
+              filter: displayValue >= star
+                ? 'drop-shadow(0 0 6px rgba(251, 191, 36, 0.6))'
+                : 'grayscale(100%) opacity(0.3)',
+              transform: !readonly && hovered >= star ? 'scale(1.25)' : 'scale(1)',
+              transition: 'transform 0.15s ease, filter 0.15s ease',
             }}
             title={readonly ? '' : labels[star]}
           >
@@ -57,7 +57,18 @@ const StarRating = ({
 
         {/* Numeric value */}
         {readonly && value > 0 && (
-          <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--color-text-primary)', marginLeft: 4 }}>
+          <span
+            style={{
+              fontSize: '0.875rem',
+              fontWeight: 700,
+              color: 'var(--color-text-primary)',
+              marginLeft: 4,
+              background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
             {value.toFixed(1)}
           </span>
         )}
