@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getMyPaymentsApi } from '../../api/paymentApi';
 import Loader from '../../components/common/Loader';
 import { formatCurrency, formatDateTime } from '../../utils/helpers';
+import { CreditCard, Smartphone, Wallet, Banknote, MapPin, RefreshCcw } from '../../components/common/Icons';
 
 const STATUS_STYLES = {
   completed: { background: '#dcfce7', color: '#166534' },
@@ -12,10 +13,10 @@ const STATUS_STYLES = {
 };
 
 const METHOD_ICONS = {
-  card:   '💳',
-  upi:    '📱',
-  wallet: '👛',
-  cash:   '💵',
+  card:   <CreditCard size={18} style={{ color: 'var(--color-primary)' }} />,
+  upi:    <Smartphone size={18} style={{ color: 'var(--color-primary)' }} />,
+  wallet: <Wallet size={18} style={{ color: 'var(--color-primary)' }} />,
+  cash:   <Banknote size={18} style={{ color: 'var(--color-primary)' }} />,
 };
 
 const PaymentHistory = () => {
@@ -109,7 +110,9 @@ const PaymentHistory = () => {
         <Loader text="Loading payments..." />
       ) : payments.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-state-icon">💳</div>
+          <div className="empty-state-icon" style={{ display: 'flex', justifyContent: 'center', color: 'var(--color-text-muted)', marginBottom: 12 }}>
+            <CreditCard size={36} strokeWidth={1.5} />
+          </div>
           <p className="empty-state-text">No payment records found.</p>
         </div>
       ) : (
@@ -125,8 +128,8 @@ const PaymentHistory = () => {
                 {/* Left */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                    <span style={{ fontSize: '1.2rem' }}>
-                      {METHOD_ICONS[payment.method] || '💳'}
+                    <span style={{ display: 'flex', alignItems: 'center' }}>
+                      {METHOD_ICONS[payment.method] || <CreditCard size={18} style={{ color: 'var(--color-primary)' }} />}
                     </span>
                     <span
                       style={{
@@ -145,8 +148,9 @@ const PaymentHistory = () => {
                   </div>
 
                   {payment.rideId && (
-                    <p style={{ margin: 0, fontSize: '0.82rem', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      📍 {payment.rideId.destination?.address || 'Unknown destination'}
+                    <p style={{ margin: 0, fontSize: '0.82rem', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <MapPin size={14} style={{ color: 'var(--color-primary)' }} />
+                      <span>{payment.rideId.destination?.address || 'Unknown destination'}</span>
                     </p>
                   )}
 
@@ -163,8 +167,9 @@ const PaymentHistory = () => {
 
                 {/* Right: amount */}
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <p style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: payment.status === 'refunded' ? '#6b21a8' : 'var(--color-primary)' }}>
-                    {payment.status === 'refunded' ? '↩ ' : ''}{formatCurrency(payment.amount)}
+                  <p style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: payment.status === 'refunded' ? '#6b21a8' : 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
+                    {payment.status === 'refunded' && <RefreshCcw size={14} />}
+                    <span>{formatCurrency(payment.amount)}</span>
                   </p>
                 </div>
               </div>

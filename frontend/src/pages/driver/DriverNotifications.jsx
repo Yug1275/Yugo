@@ -5,13 +5,13 @@ import useNotifications from '../../hooks/useNotifications';
 import { getNotificationsApi } from '../../api/notificationApi';
 import { setNotifications, setUnreadCount } from '../../store/notificationSlice';
 import Loader from '../../components/common/Loader';
-import { formatDateTime } from '../../utils/helpers';
+import { Bell, Car, Wallet, Sparkles, Check, Trash2, X } from '../../components/common/Icons';
 
 const TYPE_ICONS = {
-  ride_update: '🚗',
-  payment:     '💰',
-  promo:       '🎉',
-  system:      '🔔',
+  ride_update: <Car size={18} style={{ color: 'var(--color-primary)' }} />,
+  payment:     <Wallet size={18} style={{ color: '#22c55e' }} />,
+  promo:       <Sparkles size={18} style={{ color: '#f59e0b' }} />,
+  system:      <Bell size={18} style={{ color: '#64748b' }} />,
 };
 
 const DriverNotifications = () => {
@@ -69,14 +69,18 @@ const DriverNotifications = () => {
       >
         <div>
           <h2 className="page-title">Notifications</h2>
-          <p className="page-subtitle">
-            {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up! 🎉'}
+          <p className="page-subtitle" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            {unreadCount > 0 ? `${unreadCount} unread` : (
+              <>
+                All caught up! <Sparkles size={14} style={{ color: '#f59e0b' }} />
+              </>
+            )}
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           {unreadCount > 0 && (
-            <button className="btn btn-ghost btn-sm" onClick={markAllRead}>
-              ✓ Mark all read
+            <button className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }} onClick={markAllRead}>
+              <Check size={14} /> Mark all read
             </button>
           )}
           {notifications.length > 0 && (
@@ -91,10 +95,13 @@ const DriverNotifications = () => {
                 fontWeight: 600,
                 padding: '6px 14px',
                 fontSize: '0.8rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
               }}
               onClick={clearAll}
             >
-              🗑 Clear all
+              <Trash2 size={14} /> Clear all
             </button>
           )}
         </div>
@@ -104,7 +111,9 @@ const DriverNotifications = () => {
         <Loader text="Loading notifications..." />
       ) : notifications.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-state-icon">🔔</div>
+          <div className="empty-state-icon" style={{ display: 'flex', justifyContent: 'center', color: 'var(--color-text-muted)', marginBottom: 12 }}>
+            <Bell size={36} strokeWidth={1.5} />
+          </div>
           <p className="empty-state-text">No notifications yet.</p>
         </div>
       ) : (
@@ -126,22 +135,21 @@ const DriverNotifications = () => {
               }}
             >
               {/* Icon */}
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: '50%',
-                  background: 'var(--color-surface-2)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '1.1rem',
-                  flexShrink: 0,
-                  border: '1px solid var(--color-border)',
-                }}
-              >
-                {TYPE_ICONS[notif.type] || '🔔'}
-              </div>
+                  <div
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '50%',
+                      background: 'var(--color-surface-2)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      border: '1px solid var(--color-border)',
+                    }}
+                  >
+                    {TYPE_ICONS[notif.type] || <Bell size={18} style={{ color: 'var(--color-text-secondary)' }} />}
+                  </div>
 
               {/* Content */}
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -196,13 +204,18 @@ const DriverNotifications = () => {
                     border: 'none',
                     cursor: 'pointer',
                     color: 'var(--color-text-muted)',
-                    fontSize: '1rem',
                     padding: 2,
                     opacity: 0.6,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'opacity 0.15s ease',
                   }}
+                  onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+                  onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.6')}
                   title="Delete"
                 >
-                  ×
+                  <X size={14} />
                 </button>
               </div>
             </div>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getAdminStatsApi } from '../../api/adminApi';
 import Loader from '../../components/common/Loader';
 import { formatCurrency } from '../../utils/helpers';
+import { Wallet, CalendarDays, Car, Users, CheckCircle2, XCircle, Clock, Route, TrendingUp, CreditCard, AlertCircle, Check } from '../../components/common/Icons';
 
 const StatCard = ({ icon, label, value, sub, color, gradient, to }) => {
   const content = (
@@ -121,7 +122,7 @@ const AdminDashboard = () => {
         <p className="section-label">Revenue</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
           <StatCard
-            icon="💰"
+            icon={<Wallet size={20} style={{ color: '#166534' }} />}
             label="Total Revenue"
             value={formatCurrency(stats?.revenue?.total || 0)}
             color="#22c55e"
@@ -129,21 +130,21 @@ const AdminDashboard = () => {
             to="/admin/payments"
           />
           <StatCard
-            icon="📅"
+            icon={<CalendarDays size={20} style={{ color: '#166534' }} />}
             label="Today"
             value={formatCurrency(stats?.revenue?.today || 0)}
             color="#22c55e"
             gradient="linear-gradient(135deg, #dcfce7, #bbf7d0)"
           />
           <StatCard
-            icon="🗓️"
+            icon={<CalendarDays size={20} style={{ color: '#166534' }} />}
             label="This Week"
             value={formatCurrency(stats?.revenue?.week || 0)}
             color="#22c55e"
             gradient="linear-gradient(135deg, #dcfce7, #bbf7d0)"
           />
           <StatCard
-            icon="📆"
+            icon={<CalendarDays size={20} style={{ color: '#166534' }} />}
             label="This Month"
             value={formatCurrency(stats?.revenue?.month || 0)}
             color="#22c55e"
@@ -157,7 +158,7 @@ const AdminDashboard = () => {
         <p className="section-label">Rides</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
           <StatCard
-            icon="🚗"
+            icon={<Car size={20} style={{ color: '#1e40af' }} />}
             label="Total Rides"
             value={stats?.rides?.total || 0}
             color="#2563EB"
@@ -165,14 +166,14 @@ const AdminDashboard = () => {
             to="/admin/rides"
           />
           <StatCard
-            icon="📅"
+            icon={<CalendarDays size={20} style={{ color: '#1e40af' }} />}
             label="Today"
             value={stats?.rides?.today || 0}
             color="#2563EB"
             gradient="linear-gradient(135deg, #dbeafe, #bfdbfe)"
           />
           <StatCard
-            icon="✅"
+            icon={<CheckCircle2 size={20} style={{ color: '#166534' }} />}
             label="Completed"
             value={stats?.rides?.completed || 0}
             color="#22c55e"
@@ -180,7 +181,7 @@ const AdminDashboard = () => {
             sub={`${stats?.rides?.completionRate || 0}% completion rate`}
           />
           <StatCard
-            icon="❌"
+            icon={<XCircle size={20} style={{ color: '#991b1b' }} />}
             label="Cancelled"
             value={stats?.rides?.cancelled || 0}
             color="#ef4444"
@@ -194,7 +195,7 @@ const AdminDashboard = () => {
         <p className="section-label">Users & Drivers</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
           <StatCard
-            icon="👥"
+            icon={<Users size={20} style={{ color: '#6d28d9' }} />}
             label="Total Riders"
             value={stats?.users?.total || 0}
             color="#8b5cf6"
@@ -202,7 +203,7 @@ const AdminDashboard = () => {
             to="/admin/users"
           />
           <StatCard
-            icon="🚗"
+            icon={<Car size={20} style={{ color: '#b45309' }} />}
             label="Total Drivers"
             value={stats?.drivers?.total || 0}
             color="#f59e0b"
@@ -210,20 +211,28 @@ const AdminDashboard = () => {
             to="/admin/drivers"
           />
           <StatCard
-            icon="✅"
+            icon={<CheckCircle2 size={20} style={{ color: '#166534' }} />}
             label="Approved Drivers"
             value={stats?.drivers?.approved || 0}
             color="#22c55e"
             gradient="linear-gradient(135deg, #dcfce7, #bbf7d0)"
           />
           <StatCard
-            icon="⏳"
+            icon={<Clock size={20} style={{ color: '#b45309' }} />}
             label="Pending Approval"
             value={stats?.drivers?.pending || 0}
             color="#f59e0b"
             gradient="linear-gradient(135deg, #fef3c7, #fde68a)"
             to="/admin/drivers?status=pending"
-            sub={stats?.drivers?.pending > 0 ? '⚠️ Needs attention' : '✓ All clear'}
+            sub={stats?.drivers?.pending > 0 ? (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#b45309', fontWeight: 600 }}>
+                <AlertCircle size={12} /> Needs attention
+              </span>
+            ) : (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#166534', fontWeight: 600 }}>
+                <Check size={12} /> All clear
+              </span>
+            )}
           />
         </div>
       </div>
@@ -233,10 +242,10 @@ const AdminDashboard = () => {
         <h4 style={{ marginBottom: 16 }}>Quick Actions</h4>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10 }}>
           {[
-            { to: '/admin/drivers?status=pending', icon: '⏳', label: 'Review Drivers', gradient: 'var(--gradient-primary)', color: '#fff' },
-            { to: '/admin/rides', icon: '🛣️', label: 'All Rides', gradient: 'linear-gradient(135deg, #dbeafe, #bfdbfe)', color: 'var(--color-primary)' },
-            { to: '/admin/analytics', icon: '📈', label: 'Analytics', gradient: 'linear-gradient(135deg, #ede9fe, #ddd6fe)', color: '#7c3aed' },
-            { to: '/admin/payments', icon: '💳', label: 'Payments', gradient: 'linear-gradient(135deg, #dcfce7, #bbf7d0)', color: '#166534' },
+            { to: '/admin/drivers?status=pending', icon: <Clock size={22} />, label: 'Review Drivers', gradient: 'var(--gradient-primary)', color: '#fff' },
+            { to: '/admin/rides', icon: <Route size={22} />, label: 'All Rides', gradient: 'linear-gradient(135deg, #dbeafe, #bfdbfe)', color: 'var(--color-primary)' },
+            { to: '/admin/analytics', icon: <TrendingUp size={22} />, label: 'Analytics', gradient: 'linear-gradient(135deg, #ede9fe, #ddd6fe)', color: '#7c3aed' },
+            { to: '/admin/payments', icon: <CreditCard size={22} />, label: 'Payments', gradient: 'linear-gradient(135deg, #dcfce7, #bbf7d0)', color: '#166534' },
           ].map((action) => (
             <Link
               key={action.to}
@@ -264,7 +273,7 @@ const AdminDashboard = () => {
                 e.currentTarget.style.boxShadow = 'none';
               }}
             >
-              <span style={{ fontSize: '1.6rem' }}>{action.icon}</span>
+              <span style={{ display: 'flex', alignItems: 'center', color: action.color }}>{action.icon}</span>
               {action.label}
             </Link>
           ))}

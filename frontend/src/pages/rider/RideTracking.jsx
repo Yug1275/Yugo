@@ -9,12 +9,13 @@ import { getRideByIdApi, cancelRideApi } from '../../api/rideApi';
 import { useRiderSocket, useRideEmitter } from '../../hooks/useRideSocket';
 import { fetchRoute } from '../../utils/mapHelpers';
 import { formatCurrency, formatDateTime, formatDuration } from '../../utils/helpers';
+import { Search, Car, MapPin, Route, CheckCircle2, XCircle, AlertCircle, Clock, Wallet, Star, PhoneCall, CreditCard } from '../../components/common/Icons';
 
 const STATUS_INFO = {
   pending: {
     label: 'Looking for a driver...',
     desc: 'Your ride request has been sent. Waiting for a driver to accept.',
-    icon: '🔍',
+    icon: <Search size={18} />,
     color: 'var(--color-warning)',
     gradient: 'linear-gradient(135deg, #fef3c7, #fde68a)',
     textColor: '#92400e',
@@ -22,7 +23,7 @@ const STATUS_INFO = {
   accepted: {
     label: 'Driver accepted your ride',
     desc: 'A driver is on the way to your pickup point.',
-    icon: '🚗',
+    icon: <Car size={18} />,
     color: 'var(--color-primary)',
     gradient: 'linear-gradient(135deg, #dbeafe, #bfdbfe)',
     textColor: '#1e40af',
@@ -30,7 +31,7 @@ const STATUS_INFO = {
   en_route: {
     label: 'Driver is nearby',
     desc: 'Your driver is almost at the pickup location.',
-    icon: '📍',
+    icon: <MapPin size={18} />,
     color: 'var(--color-primary)',
     gradient: 'linear-gradient(135deg, #dbeafe, #bfdbfe)',
     textColor: '#1e40af',
@@ -38,7 +39,7 @@ const STATUS_INFO = {
   started: {
     label: 'Ride in progress',
     desc: "You're on your way! Sit back and relax.",
-    icon: '🛣️',
+    icon: <Route size={18} />,
     color: 'var(--color-success)',
     gradient: 'linear-gradient(135deg, #dcfce7, #bbf7d0)',
     textColor: '#166534',
@@ -46,7 +47,7 @@ const STATUS_INFO = {
   completed: {
     label: 'Ride completed',
     desc: 'You have reached your destination. Hope you enjoyed the ride!',
-    icon: '✅',
+    icon: <CheckCircle2 size={18} />,
     color: 'var(--color-success)',
     gradient: 'linear-gradient(135deg, #dcfce7, #bbf7d0)',
     textColor: '#166534',
@@ -54,7 +55,7 @@ const STATUS_INFO = {
   cancelled: {
     label: 'Ride cancelled',
     desc: 'This ride has been cancelled.',
-    icon: '❌',
+    icon: <XCircle size={18} />,
     color: 'var(--color-danger)',
     gradient: 'linear-gradient(135deg, #fee2e2, #fecaca)',
     textColor: '#991b1b',
@@ -167,7 +168,9 @@ const RideTracking = () => {
   if (error) {
     return (
       <div className="card" style={{ textAlign: 'center', padding: 40 }}>
-        <div style={{ fontSize: '2.5rem', marginBottom: 12 }}>⚠️</div>
+        <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--color-warning)', marginBottom: 12 }}>
+          <AlertCircle size={44} />
+        </div>
         <h3>{error}</h3>
         <Button variant="primary" onClick={() => navigate('/rider')} style={{ marginTop: 16 }}>
           Back to Dashboard
@@ -235,13 +238,13 @@ const RideTracking = () => {
                       }}
                     />
                   ))}
-                  <span style={{ fontSize: '1rem', position: 'relative', zIndex: 1 }}>{statusInfo.icon}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', position: 'relative', zIndex: 1 }}>{statusInfo.icon}</span>
                 </div>
               </div>
             )}
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-              {!isPending && <span style={{ fontSize: '1.5rem' }}>{statusInfo.icon}</span>}
+              {!isPending && <span style={{ display: 'flex', alignItems: 'center' }}>{statusInfo.icon}</span>}
               <h4 style={{ margin: 0, color: statusInfo.textColor, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                 {statusInfo.label}
               </h4>
@@ -299,26 +302,26 @@ const RideTracking = () => {
           <div className="card">
             <h4 style={{ marginBottom: 14 }}>Route</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <div style={{ display: 'flex', gap: 10 }}>
-                <span style={{ fontSize: '1.1rem', flexShrink: 0, marginTop: 2 }}>🟢</span>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <span style={{ display: 'inline-flex', width: 10, height: 10, borderRadius: '50%', background: '#22c55e', flexShrink: 0, marginTop: 6 }} />
                 <div>
                   <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--color-text-muted)', fontWeight: 700 }}>PICKUP</p>
                   <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 500 }}>{ride.pickup?.address}</p>
                 </div>
               </div>
-              <div style={{ borderLeft: '2px dashed var(--color-border)', marginLeft: 11, height: 16 }} />
-              <div style={{ display: 'flex', gap: 10 }}>
-                <span style={{ fontSize: '1.1rem', flexShrink: 0, marginTop: 2 }}>🔴</span>
+              <div style={{ borderLeft: '2px dashed var(--color-border)', marginLeft: 4, height: 16 }} />
+              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <span style={{ display: 'inline-flex', width: 10, height: 10, borderRadius: '50%', background: '#ef4444', flexShrink: 0, marginTop: 6 }} />
                 <div>
                   <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--color-text-muted)', fontWeight: 700 }}>DESTINATION</p>
                   <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 500 }}>{ride.destination?.address}</p>
                 </div>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: 12, marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--color-border)', fontSize: '0.82rem', color: 'var(--color-text-secondary)', flexWrap: 'wrap' }}>
-              {ride.distanceKm && <span>📏 {ride.distanceKm} km</span>}
-              {ride.durationMin && <span>⏱ {formatDuration(ride.durationMin)}</span>}
-              <span style={{ fontWeight: 700, color: 'var(--color-primary)' }}>💰 {formatCurrency(ride.finalFare || ride.fare)}</span>
+            <div style={{ display: 'flex', gap: 12, marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--color-border)', fontSize: '0.82rem', color: 'var(--color-text-secondary)', flexWrap: 'wrap', alignItems: 'center' }}>
+              {ride.distanceKm && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Route size={14} /> {ride.distanceKm} km</span>}
+              {ride.durationMin && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Clock size={14} /> {formatDuration(ride.durationMin)}</span>}
+              <span style={{ fontWeight: 700, color: 'var(--color-primary)', display: 'inline-flex', alignItems: 'center', gap: 4 }}><Wallet size={14} /> {formatCurrency(ride.finalFare || ride.fare)}</span>
             </div>
           </div>
 
@@ -358,8 +361,8 @@ const RideTracking = () => {
                       {driverUser?.name}
                     </p>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 4 }}>
-                      <span style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
-                        ⭐ {driver.rating || 'N/A'}
+                      <span style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                        <Star size={12} style={{ color: '#fbbf24' }} /> {driver.rating || 'N/A'}
                       </span>
                       <span style={{ color: 'var(--color-border)' }}>·</span>
                       <span style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
@@ -385,9 +388,9 @@ const RideTracking = () => {
                   <a
                     href={`tel:${driverUser.phone}`}
                     className="btn btn-ghost btn-sm btn-full"
-                    style={{ textDecoration: 'none', textAlign: 'center' }}
+                    style={{ textDecoration: 'none', textAlign: 'center', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
                   >
-                    📞 Call Driver
+                    <PhoneCall size={14} /> Call Driver
                   </a>
                 )}
               </div>
@@ -431,8 +434,9 @@ const RideTracking = () => {
                 variant="primary"
                 fullWidth
                 onClick={() => navigate(`/rider/payment/${ride._id}`)}
+                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
               >
-                💳 Pay Now — {formatCurrency(ride.finalFare || ride.fare)}
+                <CreditCard size={16} /> Pay Now — {formatCurrency(ride.finalFare || ride.fare)}
               </Button>
             )}
 
@@ -441,8 +445,9 @@ const RideTracking = () => {
                 variant="secondary"
                 fullWidth
                 onClick={() => navigate(`/rider/review/${ride._id}`)}
+                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
               >
-                ⭐ Rate Driver
+                <Star size={16} /> Rate Driver
               </Button>
             )}
 
@@ -483,9 +488,9 @@ const RideTracking = () => {
               boxShadow: 'var(--shadow-sm)',
             }}
           >
-            <span>🟢 Pickup</span>
-            <span>🔴 Destination</span>
-            <span>🚗 Driver (live)</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e' }} /> Pickup</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444' }} /> Destination</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Car size={14} style={{ color: 'var(--color-primary)' }} /> Driver (live)</span>
           </div>
         </div>
       </div>

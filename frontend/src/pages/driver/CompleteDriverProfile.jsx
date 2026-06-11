@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import { completeDriverProfileApi } from '../../api/driverApi';
+import { Car } from '../../components/common/Icons';
 
 const VEHICLE_TYPES = ['sedan', 'suv', 'hatchback', 'auto'];
 
@@ -72,7 +73,9 @@ const CompleteDriverProfile = () => {
         <div className="card">
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 28 }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: 10 }}>🚗</div>
+            <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--color-primary)', marginBottom: 12 }}>
+              <Car size={40} strokeWidth={1.5} />
+            </div>
             <h2 style={{ marginBottom: 6 }}>Complete Your Driver Profile</h2>
             <p style={{ fontSize: '0.9rem' }}>
               Add your license and vehicle details to start accepting rides.
@@ -126,20 +129,18 @@ const CompleteDriverProfile = () => {
                     type="button"
                     onClick={() => setForm((prev) => ({ ...prev, vehicleType: type }))}
                     style={{
-                      padding: '10px 6px',
+                      padding: '12px 6px',
                       borderRadius: 8,
                       border: `2px solid ${form.vehicleType === type ? 'var(--color-primary)' : 'var(--color-border)'}`,
                       background: form.vehicleType === type ? 'var(--color-primary-light)' : 'var(--color-surface)',
                       color: form.vehicleType === type ? 'var(--color-primary)' : 'var(--color-text-secondary)',
                       fontWeight: 600,
-                      fontSize: '0.78rem',
+                      fontSize: '0.8rem',
                       cursor: 'pointer',
                       textTransform: 'capitalize',
                       transition: 'all 0.15s ease',
                     }}
                   >
-                    {type === 'sedan' ? '🚗' : type === 'suv' ? '🚙' : type === 'hatchback' ? '🚘' : '🛺'}
-                    <br />
                     {type}
                   </button>
                 ))}

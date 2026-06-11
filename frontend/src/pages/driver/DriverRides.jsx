@@ -4,6 +4,7 @@ import { getDriverRidesApi, startRideApi, completeRideApi } from '../../api/driv
 import Badge from '../../components/common/Badge';
 import Loader from '../../components/common/Loader';
 import { formatCurrency, formatDateTime, formatDuration } from '../../utils/helpers';
+import { Car, Route, Clock, User, CheckCircle2, Play, MapPin } from '../../components/common/Icons';
 
 const FILTERS = ['all', 'accepted', 'en_route', 'started', 'completed', 'cancelled'];
 
@@ -91,7 +92,9 @@ const DriverRides = () => {
         <Loader text="Loading rides..." />
       ) : rides.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-state-icon">🚗</div>
+          <div className="empty-state-icon" style={{ display: 'flex', justifyContent: 'center', color: 'var(--color-text-muted)', marginBottom: 12 }}>
+            <Car size={36} strokeWidth={1.5} />
+          </div>
           <p className="empty-state-text">No rides found.</p>
         </div>
       ) : (
@@ -109,21 +112,21 @@ const DriverRides = () => {
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--color-success)', fontWeight: 700, marginTop: 2 }}>FROM</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: '0.875rem' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: 'linear-gradient(135deg, #dcfce7, #bbf7d0)', color: '#166534', fontWeight: 800, fontSize: '0.65rem', padding: '2px 6px', borderRadius: 4, flexShrink: 0, letterSpacing: '0.5px' }}><MapPin size={10} /> FROM</span>
                       <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{ride.pickup?.address}</span>
                     </div>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--color-danger)', fontWeight: 700, marginTop: 2 }}>TO</span>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: '0.875rem' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: 'linear-gradient(135deg, #fee2e2, #fecaca)', color: '#991b1b', fontWeight: 800, fontSize: '0.65rem', padding: '2px 6px', borderRadius: 4, flexShrink: 0, letterSpacing: '0.5px' }}><MapPin size={10} /> TO</span>
                       <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{ride.destination?.address}</span>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: 14, marginTop: 8, fontSize: '0.8rem', color: 'var(--color-text-muted)', flexWrap: 'wrap' }}>
-                    {ride.distanceKm && <span>📏 {ride.distanceKm} km</span>}
-                    {ride.durationMin && <span>⏱ {formatDuration(ride.durationMin)}</span>}
-                    <span>👤 {ride.riderId?.name || 'Rider'}</span>
+                  <div style={{ display: 'flex', gap: 14, marginTop: 8, fontSize: '0.8rem', color: 'var(--color-text-muted)', flexWrap: 'wrap', alignItems: 'center' }}>
+                    {ride.distanceKm && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Route size={14} /> {ride.distanceKm} km</span>}
+                    {ride.durationMin && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Clock size={14} /> {formatDuration(ride.durationMin)}</span>}
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><User size={14} /> {ride.riderId?.name || 'Rider'}</span>
                   </div>
                 </div>
 
@@ -147,9 +150,16 @@ const DriverRides = () => {
                           fontWeight: 600,
                           fontSize: '0.8rem',
                           cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
                         }}
                       >
-                        {actionLoading === ride._id + '_start' ? 'Starting...' : '▶ Start Ride'}
+                        {actionLoading === ride._id + '_start' ? 'Starting...' : (
+                          <>
+                            <Play size={12} fill="#fff" /> Start Ride
+                          </>
+                        )}
                       </button>
                     )}
 
@@ -166,9 +176,16 @@ const DriverRides = () => {
                           fontWeight: 600,
                           fontSize: '0.8rem',
                           cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
                         }}
                       >
-                        {actionLoading === ride._id + '_complete' ? 'Completing...' : '✅ Complete'}
+                        {actionLoading === ride._id + '_complete' ? 'Completing...' : (
+                          <>
+                            <CheckCircle2 size={12} /> Complete
+                          </>
+                        )}
                       </button>
                     )}
                   </div>

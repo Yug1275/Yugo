@@ -3,6 +3,7 @@ import { getDriverEarningsApi } from '../../api/driverApi';
 import Loader from '../../components/common/Loader';
 import Badge from '../../components/common/Badge';
 import { formatCurrency, formatDateTime } from '../../utils/helpers';
+import { Wallet, CalendarDays, Star, Car, BarChart2, MapPin } from '../../components/common/Icons';
 
 const DriverEarnings = () => {
   const [data, setData] = useState(null);
@@ -26,7 +27,9 @@ const DriverEarnings = () => {
 
   if (!data) return (
     <div className="empty-state">
-      <div className="empty-state-icon">💰</div>
+      <div className="empty-state-icon" style={{ display: 'flex', justifyContent: 'center', color: 'var(--color-text-muted)', marginBottom: 12 }}>
+        <Wallet size={36} strokeWidth={1.5} />
+      </div>
       <p className="empty-state-text">Could not load earnings data.</p>
     </div>
   );
@@ -48,12 +51,12 @@ const DriverEarnings = () => {
         }}
       >
         {[
-          { icon: '📅', label: "Today's Earnings", value: formatCurrency(data.todayEarnings), color: '#dcfce7' },
-          { icon: '🗓️', label: 'This Week', value: formatCurrency(data.weekEarnings), color: '#dbeafe' },
-          { icon: '💰', label: 'All Time', value: formatCurrency(data.totalEarnings), color: '#fef3c7' },
-          { icon: '🚗', label: "Today's Rides", value: data.todayRides, color: '#f3e8ff' },
-          { icon: '📊', label: 'Week Rides', value: data.weekRides, color: '#fee2e2' },
-          { icon: '⭐', label: 'Rating', value: data.rating ? data.rating.toFixed(1) : 'N/A', color: '#fef3c7' },
+          { icon: <Wallet size={20} style={{ color: '#166534' }} />, label: "Today's Earnings", value: formatCurrency(data.todayEarnings), color: '#dcfce7' },
+          { icon: <CalendarDays size={20} style={{ color: '#1e40af' }} />, label: 'This Week', value: formatCurrency(data.weekEarnings), color: '#dbeafe' },
+          { icon: <Wallet size={20} style={{ color: '#b45309' }} />, label: 'All Time', value: formatCurrency(data.totalEarnings), color: '#fef3c7' },
+          { icon: <Car size={20} style={{ color: '#6d28d9' }} />, label: "Today's Rides", value: data.todayRides, color: '#f3e8ff' },
+          { icon: <BarChart2 size={20} style={{ color: '#b91c1c' }} />, label: 'Week Rides', value: data.weekRides, color: '#fee2e2' },
+          { icon: <Star size={20} style={{ color: '#b45309' }} />, label: 'Rating', value: data.rating ? data.rating.toFixed(1) : 'N/A', color: '#fef3c7' },
         ].map((stat) => (
           <div
             key={stat.label}
@@ -66,7 +69,7 @@ const DriverEarnings = () => {
               border: 'none',
             }}
           >
-            <span style={{ fontSize: '1.5rem' }}>{stat.icon}</span>
+            <span style={{ display: 'flex', alignItems: 'center', height: 24 }}>{stat.icon}</span>
             <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>
               {stat.label}
             </p>
@@ -95,12 +98,12 @@ const DriverEarnings = () => {
                   border: '1px solid var(--color-border)',
                 }}
               >
-                <span style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
-                  📅 {day.date}
+                <span style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                  <CalendarDays size={14} /> {day.date}
                 </span>
                 <div style={{ display: 'flex', gap: 20, fontSize: '0.875rem' }}>
-                  <span style={{ color: 'var(--color-text-muted)' }}>
-                    🚗 {day.rides} ride{day.rides !== 1 ? 's' : ''}
+                  <span style={{ color: 'var(--color-text-muted)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    <Car size={14} /> {day.rides} ride{day.rides !== 1 ? 's' : ''}
                   </span>
                   <span style={{ fontWeight: 700, color: 'var(--color-primary)' }}>
                     {formatCurrency(day.earnings)}
@@ -133,10 +136,11 @@ const DriverEarnings = () => {
                 }}
               >
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    📍 {ride.destination?.address}
+                  <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <MapPin size={14} style={{ color: 'var(--color-primary)' }} />
+                    <span>{ride.destination?.address}</span>
                   </p>
-                  <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: 2 }}>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: 3 }}>
                     {formatDateTime(ride.createdAt)}
                   </p>
                 </div>
@@ -154,7 +158,9 @@ const DriverEarnings = () => {
 
       {data.recentRides?.length === 0 && (
         <div className="empty-state">
-          <div className="empty-state-icon">💰</div>
+          <div className="empty-state-icon" style={{ display: 'flex', justifyContent: 'center', color: 'var(--color-text-muted)', marginBottom: 12 }}>
+            <Wallet size={36} strokeWidth={1.5} />
+          </div>
           <p className="empty-state-text">No completed rides yet. Start accepting rides to earn!</p>
         </div>
       )}

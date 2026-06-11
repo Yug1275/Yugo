@@ -3,6 +3,7 @@ import { searchApi } from '../../api/driverApi';
 import Badge from '../../components/common/Badge';
 import Loader from '../../components/common/Loader';
 import { formatCurrency, formatDateTime } from '../../utils/helpers';
+import { Search, Car, MapPin, User, Star, Shield, Info } from '../../components/common/Icons';
 
 const TYPES = [
   { value: 'all',     label: 'All'     },
@@ -54,7 +55,7 @@ const SearchPage = () => {
       {/* Search bar */}
       <div className="card" style={{ marginBottom: 20 }}>
         <div style={{ position: 'relative', marginBottom: 14 }}>
-          <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '1rem', pointerEvents: 'none' }}>🔍</span>
+          <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)', pointerEvents: 'none' }} />
           <input
             className="input"
             placeholder="Search by address, driver name, status..."
@@ -93,12 +94,16 @@ const SearchPage = () => {
         <Loader text="Searching..." />
       ) : !results ? (
         <div className="empty-state">
-          <div className="empty-state-icon">🔍</div>
+          <div className="empty-state-icon" style={{ display: 'flex', justifyContent: 'center', color: 'var(--color-text-muted)', marginBottom: 12 }}>
+            <Search size={36} strokeWidth={1.5} />
+          </div>
           <p className="empty-state-text">Type something to search rides and drivers</p>
         </div>
       ) : totalResults === 0 ? (
         <div className="empty-state">
-          <div className="empty-state-icon">😕</div>
+          <div className="empty-state-icon" style={{ display: 'flex', justifyContent: 'center', color: 'var(--color-text-muted)', marginBottom: 12 }}>
+            <Info size={36} strokeWidth={1.5} />
+          </div>
           <p className="empty-state-text">No results found for "{query}"</p>
         </div>
       ) : (
@@ -107,8 +112,8 @@ const SearchPage = () => {
           {/* Ride results */}
           {results.rides?.length > 0 && (
             <div className="card">
-              <h4 style={{ marginBottom: 14 }}>
-                🚗 Rides <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 400 }}>({results.rides.length})</span>
+              <h4 style={{ marginBottom: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Car size={18} style={{ color: 'var(--color-primary)' }} /> Rides <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 400 }}>({results.rides.length})</span>
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {results.rides.map((ride) => (
@@ -132,12 +137,14 @@ const SearchPage = () => {
                           {formatDateTime(ride.createdAt)}
                         </span>
                       </div>
-                      <p style={{ margin: 0, fontSize: '0.82rem', fontWeight: 500, color: 'var(--color-text-primary)' }}>
-                        📍 {ride.pickup?.address} → {ride.destination?.address}
+                      <p style={{ margin: 0, fontSize: '0.82rem', fontWeight: 500, color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
+                        <MapPin size={14} style={{ color: 'var(--color-primary)' }} />
+                        <span>{ride.pickup?.address} → {ride.destination?.address}</span>
                       </p>
                       {ride.riderId?.name && (
-                        <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: 3 }}>
-                          👤 {ride.riderId.name}
+                        <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: 3, display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <User size={12} />
+                          <span>{ride.riderId.name}</span>
                         </p>
                       )}
                     </div>
@@ -153,8 +160,8 @@ const SearchPage = () => {
           {/* Driver results */}
           {results.drivers?.length > 0 && (
             <div className="card">
-              <h4 style={{ marginBottom: 14 }}>
-                🧑‍✈️ Drivers <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 400 }}>({results.drivers.length})</span>
+              <h4 style={{ marginBottom: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Shield size={18} style={{ color: 'var(--color-primary)' }} /> Drivers <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 400 }}>({results.drivers.length})</span>
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {results.drivers.map((driver) => (
@@ -178,12 +185,18 @@ const SearchPage = () => {
                       </div>
                       <div>
                         <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem' }}>{driver.userId?.name}</p>
-                        <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
-                          {driver.licenseNumber} · ⭐ {driver.rating || 'N/A'} · {driver.totalRides} rides
+                        <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
+                          <span>{driver.licenseNumber}</span>
+                          <span>·</span>
+                          <Star size={12} style={{ color: '#fbbf24' }} />
+                          <span>{driver.rating || 'N/A'}</span>
+                          <span>·</span>
+                          <span>{driver.totalRides} rides</span>
                         </p>
                         {driver.vehicle && (
-                          <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-                            🚗 {driver.vehicle.vehicleModel} · {driver.vehicle.vehicleNumber}
+                          <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: 3, display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <Car size={12} />
+                            <span>{driver.vehicle.vehicleModel} · {driver.vehicle.vehicleNumber}</span>
                           </p>
                         )}
                       </div>

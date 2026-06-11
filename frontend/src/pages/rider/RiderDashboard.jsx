@@ -5,6 +5,7 @@ import { getRiderRidesApi, getActiveRideApi, cancelRideApi } from '../../api/rid
 import Badge from '../../components/common/Badge';
 import Loader from '../../components/common/Loader';
 import { formatCurrency, formatDateTime } from '../../utils/helpers';
+import { Sunrise, Sun, Moon, Car, Wallet, Clock, ArrowRight, CheckCircle2, XCircle, User, MapPin, Bell } from '../../components/common/Icons';
 
 const STATUS_BORDER = {
   completed: '#22c55e',
@@ -118,7 +119,7 @@ const RiderDashboard = () => {
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-  const greetEmoji = hour < 12 ? '🌅' : hour < 17 ? '☀️' : '🌙';
+  const greetIcon = hour < 12 ? <Sunrise size={16} style={{ color: 'rgba(255,255,255,0.8)' }} /> : hour < 17 ? <Sun size={16} style={{ color: 'rgba(255,255,255,0.8)' }} /> : <Moon size={16} style={{ color: 'rgba(255,255,255,0.8)' }} />;
 
   return (
     <div style={{ animation: 'fadeIn 0.3s ease' }}>
@@ -149,8 +150,8 @@ const RiderDashboard = () => {
           }}
         />
         <div style={{ position: 'relative' }}>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>
-            {greetEmoji} {greeting}
+          <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
+            {greetIcon} {greeting}
           </p>
           <h2
             style={{
@@ -161,7 +162,7 @@ const RiderDashboard = () => {
               letterSpacing: '-0.75px',
             }}
           >
-            {user?.name?.split(' ')[0]} 👋
+            {user?.name?.split(' ')[0]}
           </h2>
           <p style={{ margin: 0, fontSize: '0.88rem', color: 'rgba(255,255,255,0.75)' }}>
             Here's what's happening with your rides
@@ -193,7 +194,7 @@ const RiderDashboard = () => {
               e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
             }}
           >
-            🚗 Book a Ride
+            <Car size={16} style={{ marginRight: 6 }} /> Book a Ride
           </Link>
         </div>
       </div>
@@ -217,7 +218,7 @@ const RiderDashboard = () => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: '1.5rem' }}>🚗</span>
+            <span style={{ display: 'flex', alignItems: 'center', background: '#ffffff50', borderRadius: '50%', padding: 8 }}><Car size={22} style={{ color: '#166534' }} /></span>
             <div>
               <p style={{ margin: 0, fontWeight: 700, color: '#166534', fontSize: '0.9rem' }}>
                 Active ride in progress
@@ -233,7 +234,7 @@ const RiderDashboard = () => {
               className="btn btn-sm"
               style={{ background: '#22c55e', color: '#fff', border: 'none', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontWeight: 700, borderRadius: 8, padding: '7px 16px', fontSize: '0.82rem' }}
             >
-              Track →
+              Track <ArrowRight size={14} style={{ marginLeft: 4 }} />
             </Link>
             <button
               onClick={handleCancelRide}
@@ -256,25 +257,25 @@ const RiderDashboard = () => {
       {/* ── Stat cards ── */}
       <div className="responsive-grid-auto-fit" style={{ marginBottom: 24, '--grid-min': '160px' }}>
         <StatCard
-          icon="🚗"
+          icon={<Car size={22} style={{ color: 'var(--color-primary)' }} />}
           label="Total Rides"
           value={stats.total}
           gradient="linear-gradient(135deg, #dbeafe, #bfdbfe)"
         />
         <StatCard
-          icon="✅"
+          icon={<CheckCircle2 size={22} style={{ color: '#22c55e' }} />}
           label="Completed"
           value={stats.completed}
           gradient="linear-gradient(135deg, #dcfce7, #bbf7d0)"
         />
         <StatCard
-          icon="❌"
+          icon={<XCircle size={22} style={{ color: '#ef4444' }} />}
           label="Cancelled"
           value={stats.cancelled}
           gradient="linear-gradient(135deg, #fee2e2, #fecaca)"
         />
         <StatCard
-          icon="💰"
+          icon={<Wallet size={22} style={{ color: '#b45309' }} />}
           label="Total Spent"
           value={formatCurrency(stats.spent)}
           gradient="linear-gradient(135deg, #fef3c7, #fde68a)"
@@ -286,9 +287,9 @@ const RiderDashboard = () => {
         <h4 style={{ marginBottom: 14 }}>Quick Actions</h4>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: 10 }}>
           {[
-            { to: '/rider/book', icon: '🚗', label: 'Book a Ride', gradient: 'var(--gradient-primary)', color: '#fff' },
-            { to: '/rider/history', icon: '🕒', label: 'History', gradient: 'linear-gradient(135deg, #dbeafe, #bfdbfe)', color: 'var(--color-primary)' },
-            { to: '/rider/profile', icon: '👤', label: 'Profile', gradient: 'linear-gradient(135deg, #ede9fe, #ddd6fe)', color: '#7c3aed' },
+            { to: '/rider/book', icon: <Car size={22} />, label: 'Book a Ride', gradient: 'var(--gradient-primary)', color: '#fff' },
+            { to: '/rider/history', icon: <Clock size={22} />, label: 'History', gradient: 'linear-gradient(135deg, #dbeafe, #bfdbfe)', color: 'var(--color-primary)' },
+            { to: '/rider/notifications', icon: <Bell size={22} />, label: 'Notifications', gradient: 'linear-gradient(135deg, #ede9fe, #ddd6fe)', color: '#7c3aed' },
           ].map((action) => (
             <Link
               key={action.to}
@@ -316,7 +317,7 @@ const RiderDashboard = () => {
                 e.currentTarget.style.boxShadow = 'none';
               }}
             >
-              <span style={{ fontSize: '1.5rem' }}>{action.icon}</span>
+              <span style={{ display: 'flex', alignItems: 'center', color: action.color }}>{action.icon}</span>
               {action.label}
             </Link>
           ))}
@@ -334,8 +335,10 @@ const RiderDashboard = () => {
 
         {recentRides.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">🚗</div>
-            <p className="empty-state-title" style={{ marginTop: 12 }}>No rides yet</p>
+            <div className="empty-state-icon" style={{ display: 'flex', justifyContent: 'center', color: 'var(--color-text-muted)', marginBottom: 12 }}>
+              <Car size={36} strokeWidth={1.5} />
+            </div>
+            <p className="empty-state-title">No rides yet</p>
             <p className="empty-state-text">Book your first ride and start your journey!</p>
             <Link to="/rider/book" className="btn btn-primary" style={{ marginTop: 16 }}>
               Book Now
@@ -381,7 +384,8 @@ const RiderDashboard = () => {
                       textOverflow: 'ellipsis',
                     }}
                   >
-                    📍 {ride.destination?.address || 'Unknown destination'}
+                    <MapPin size={14} style={{ color: 'var(--color-primary)', marginRight: 6, verticalAlign: 'middle' }} />
+                    <span style={{ verticalAlign: 'middle' }}>{ride.destination?.address || 'Unknown destination'}</span>
                   </p>
                   <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: 2 }}>
                     {formatDateTime(ride.createdAt)}

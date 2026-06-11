@@ -869,35 +869,15 @@ a:hover {
   }
 }
 
-/* ─── Mobile Bottom Navigation ───────────────────────────────────────── */
-.mobile-bottom-nav {
-  display: none;
+/* ─── App main content (full-width, no static sidebar) ───────────────── */
+.app-main {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
-  /* Hide desktop sidebar */
-  .desktop-sidebar {
-    display: none !important;
-  }
-
-  /* Main content: no left padding, add bottom padding for bottom nav */
-  .rider-main {
-    padding: 16px 14px 80px !important;
-  }
-
-  /* Show bottom nav */
-  .mobile-bottom-nav {
-    display: flex;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--color-surface);
-    backdrop-filter: var(--backdrop-blur);
-    border-top: 1px solid var(--color-border);
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
-    z-index: 100;
-    height: 62px;
+  .app-main {
+    padding: 16px 14px !important;
   }
 }
 
@@ -905,6 +885,19 @@ a:hover {
   .nav-username {
     display: none;
   }
+}
+
+/* Legacy — kept for any remaining references */
+.mobile-bottom-nav {
+  display: none !important;
+}
+.desktop-sidebar {
+  display: none !important;
+}
+.rider-main,
+.driver-main,
+.admin-main {
+  padding: 16px 14px !important;
 }
 
 /* ─── BookRide Layout ────────────────────────────────────────────────── */
@@ -992,12 +985,6 @@ a:hover {
   .responsive-grid-auto-fit {
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   }
-  .rider-main {
-    padding-left: 16px !important;
-    padding-right: 14px !important;
-    padding-top: 16px !important;
-    padding-bottom: 80px !important;
-  }
 }
 
 @media (max-width: 480px) {
@@ -1005,14 +992,6 @@ a:hover {
   h2 { font-size: 1.2rem; }
 }
 
-@media (max-width: 768px) {
-  .driver-main {
-    padding: 16px 14px 80px !important;
-  }
-  .admin-main {
-    padding: 16px 14px 80px !important;
-  }
-}
 
 /* ─── Analytics chart bars gradient override ──────────────────────────── */
 .chart-bar-blue {

@@ -3,6 +3,7 @@ import { getMyReviewsApi } from '../../api/reviewApi';
 import StarRating from '../../components/common/StarRating';
 import Loader from '../../components/common/Loader';
 import { formatCurrency, formatDateTime } from '../../utils/helpers';
+import { Star } from '../../components/common/Icons';
 
 const MyReviews = () => {
   const [reviews, setReviews] = useState([]);
@@ -52,7 +53,7 @@ const MyReviews = () => {
               Avg Rating Given
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-              <span style={{ fontSize: '1.4rem' }}>⭐</span>
+              <Star size={22} style={{ color: '#92400e', fill: '#92400e' }} />
               <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#92400e' }}>
                 {avgRating}
               </span>
@@ -73,7 +74,9 @@ const MyReviews = () => {
         <Loader text="Loading reviews..." />
       ) : reviews.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-state-icon">⭐</div>
+          <div className="empty-state-icon" style={{ display: 'flex', justifyContent: 'center', color: 'var(--color-text-muted)', marginBottom: 12 }}>
+            <Star size={36} strokeWidth={1.5} />
+          </div>
           <p className="empty-state-text">
             You haven't submitted any reviews yet. Complete a ride to leave a review!
           </p>
@@ -154,14 +157,14 @@ const MyReviews = () => {
                       color: 'var(--color-text-secondary)',
                     }}
                   >
-                    <div style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
-                      <span>🟢</span>
+                    <div style={{ display: 'flex', gap: 8, marginBottom: 6, alignItems: 'center' }}>
+                      <span style={{ display: 'inline-flex', width: 8, height: 8, borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
                       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {review.rideId.pickup?.address}
                       </span>
                     </div>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <span>🔴</span>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <span style={{ display: 'inline-flex', width: 8, height: 8, borderRadius: '50%', background: '#ef4444', flexShrink: 0 }} />
                       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {review.rideId.destination?.address}
                       </span>

@@ -4,6 +4,7 @@ import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Modal from '../../components/common/Modal';
 import { addSavedLocationApi, removeSavedLocationApi } from '../../api/userApi';
+import { MapPin, Home, Briefcase, Dumbbell, GraduationCap, Trash2 } from '../../components/common/Icons';
 
 const LABEL_OPTIONS = ['Home', 'Work', 'Gym', 'College', 'Other'];
 
@@ -66,7 +67,13 @@ const SavedLocations = () => {
     }
   };
 
-  const locationIcons = { Home: '🏠', Work: '💼', Gym: '💪', College: '🎓', Other: '📍' };
+  const locationIcons = {
+    Home: <Home size={18} style={{ color: 'var(--color-primary)' }} />,
+    Work: <Briefcase size={18} style={{ color: 'var(--color-primary)' }} />,
+    Gym: <Dumbbell size={18} style={{ color: 'var(--color-primary)' }} />,
+    College: <GraduationCap size={18} style={{ color: 'var(--color-primary)' }} />,
+    Other: <MapPin size={18} style={{ color: 'var(--color-primary)' }} />,
+  };
 
   return (
     <div>
@@ -87,7 +94,9 @@ const SavedLocations = () => {
       {/* Locations grid */}
       {locations.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-state-icon">📍</div>
+          <div className="empty-state-icon" style={{ display: 'flex', justifyContent: 'center', color: 'var(--color-text-muted)', marginBottom: 12 }}>
+            <MapPin size={36} strokeWidth={1.5} />
+          </div>
           <p className="empty-state-text">No saved locations yet.</p>
           <Button
             variant="primary"
@@ -126,7 +135,7 @@ const SavedLocations = () => {
                     flexShrink: 0,
                   }}
                 >
-                  {locationIcons[loc.label] || '📍'}
+                  {locationIcons[loc.label] || <MapPin size={18} style={{ color: 'var(--color-primary)' }} />}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ margin: 0, fontWeight: 700, color: 'var(--color-text-primary)' }}>
@@ -147,8 +156,9 @@ const SavedLocations = () => {
                 </div>
               </div>
 
-              <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-                📌 {loc.coordinates?.lat?.toFixed(4)}, {loc.coordinates?.lng?.toFixed(4)}
+              <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <MapPin size={12} style={{ color: 'var(--color-text-muted)' }} />
+                <span>{loc.coordinates?.lat?.toFixed(4)}, {loc.coordinates?.lng?.toFixed(4)}</span>
               </div>
 
               <button
@@ -165,9 +175,16 @@ const SavedLocations = () => {
                   padding: '4px 8px',
                   borderRadius: 6,
                   opacity: deleteLoading === index ? 0.5 : 1,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
                 }}
               >
-                {deleteLoading === index ? 'Removing...' : '🗑 Remove'}
+                {deleteLoading === index ? 'Removing...' : (
+                  <>
+                    <Trash2 size={12} /> Remove
+                  </>
+                )}
               </button>
             </div>
           ))}
@@ -199,9 +216,15 @@ const SavedLocations = () => {
                     fontWeight: 600,
                     fontSize: '0.8rem',
                     cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
                   }}
                 >
-                  {locationIcons[l]} {l}
+                  <span style={{ display: 'flex', alignItems: 'center', color: form.label === l ? '#fff' : 'var(--color-primary)' }}>
+                    {locationIcons[l]}
+                  </span>
+                  {l}
                 </button>
               ))}
             </div>
