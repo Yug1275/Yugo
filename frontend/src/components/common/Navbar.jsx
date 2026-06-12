@@ -3,15 +3,12 @@ import useTheme from '../../hooks/useTheme';
 import useAuth from '../../hooks/useAuth';
 import NotificationBell from './NotificationBell';
 import Logo from './Logo';
+import Avatar from './Avatar';
 import { ChevronDown, Sun, Moon } from './Icons';
 
 const Navbar = ({ onProfileClick, onMenuClick, sidebarOpen }) => {
   const { isDark, toggleTheme } = useTheme();
   const { isAuthenticated, user } = useAuth();
-
-  const initials = user?.name
-    ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
-    : '?';
 
   return (
     <>
@@ -116,72 +113,33 @@ const Navbar = ({ onProfileClick, onMenuClick, sidebarOpen }) => {
               {/* Notification Bell */}
               <NotificationBell />
 
-              {/* Clickable profile pill */}
+              {/* Clickable profile avatar */}
               <button
                 onClick={onProfileClick}
                 title="Open profile"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 8,
                   background: 'transparent',
                   border: '1.5px solid var(--color-border)',
-                  borderRadius: 24,
-                  padding: '4px 10px 4px 4px',
+                  borderRadius: '50%',
+                  padding: '2px',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
                   flexShrink: 0,
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'var(--color-surface-2)';
                   e.currentTarget.style.borderColor = 'var(--color-primary)';
                   e.currentTarget.style.boxShadow = '0 0 0 3px rgba(37,99,235,0.1)';
+                  e.currentTarget.style.transform = 'scale(1.05)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
                   e.currentTarget.style.borderColor = 'var(--color-border)';
                   e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.transform = 'scale(1)';
                 }}
               >
-                {/* Avatar */}
-                <div
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: '50%',
-                    background: 'var(--gradient-primary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#fff',
-                    fontWeight: 700,
-                    fontSize: '0.72rem',
-                    flexShrink: 0,
-                    boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)',
-                    letterSpacing: '0.5px',
-                  }}
-                >
-                  {initials}
-                </div>
-
-                {/* Name — hidden on small screens */}
-                <span
-                  style={{
-                    fontSize: '0.82rem',
-                    fontWeight: 600,
-                    color: 'var(--color-text-primary)',
-                    maxWidth: 100,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                  className="nav-username"
-                >
-                  {user?.name}
-                </span>
-
-                {/* Chevron */}
-                <ChevronDown size={14} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
+                <Avatar user={user} size={32} />
               </button>
             </>
           ) : (

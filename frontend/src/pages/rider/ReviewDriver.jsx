@@ -5,6 +5,7 @@ import { createReviewApi, getReviewByRideApi } from '../../api/reviewApi';
 import StarRating from '../../components/common/StarRating';
 import Button from '../../components/common/Button';
 import Loader from '../../components/common/Loader';
+import Avatar from '../../components/common/Avatar';
 import { formatCurrency, formatDateTime } from '../../utils/helpers';
 
 const QUICK_COMMENTS = [
@@ -190,23 +191,7 @@ const ReviewDriver = () => {
         <div className="card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
             {/* Driver avatar */}
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: '50%',
-                background: 'var(--color-primary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#fff',
-                fontWeight: 700,
-                fontSize: '1.3rem',
-                flexShrink: 0,
-              }}
-            >
-              {driverName.charAt(0).toUpperCase()}
-            </div>
+            <Avatar user={driver?.userId} name={driverName} size={56} role="driver" />
             <div>
               <h4 style={{ margin: 0 }}>{driverName}</h4>
               {driver?.rating > 0 && (

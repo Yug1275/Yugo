@@ -4,10 +4,19 @@ import useAuth from '../../hooks/useAuth';
 import useTheme from '../../hooks/useTheme';
 import Input from './Input';
 import Button from './Button';
+import Avatar from './Avatar';
 import { updateProfileApi, changePasswordApi } from '../../api/userApi';
 import { completeDriverProfileApi } from '../../api/driverApi';
 import { setDriverProfile } from '../../store/driverSlice';
 import { Edit, Lock, ChevronDown, ChevronUp, X, Sun, Moon, LogOut, Car } from './Icons';
+
+const PRESET_AVATARS = [
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=Jack',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=Milo',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=Luna'
+];
 
 /* ─── Rider tabs ─── */
 const RiderContent = ({ user, updateUser }) => {
@@ -16,6 +25,7 @@ const RiderContent = ({ user, updateUser }) => {
   const [profileForm, setProfileForm] = useState({
     name: user?.name || '',
     phone: user?.phone || '',
+    profileImage: user?.profileImage || '',
   });
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileMsg, setProfileMsg] = useState('');
@@ -139,6 +149,57 @@ const RiderContent = ({ user, updateUser }) => {
                 <Input label="Phone" name="phone" type="tel" placeholder="+91 98765 43210"
                   value={profileForm.phone}
                   onChange={(e) => setProfileForm(p => ({ ...p, phone: e.target.value }))} />
+                
+                <div className="form-group">
+                  <Input label="Profile Image URL" name="profileImage" type="url" placeholder="https://example.com/avatar.jpg"
+                    value={profileForm.profileImage}
+                    onChange={(e) => setProfileForm(p => ({ ...p, profileImage: e.target.value }))} />
+                  
+                  <label className="input-label" style={{ fontSize: '0.8rem', marginTop: 4, marginBottom: 8, color: 'var(--color-text-secondary)' }}>
+                    Or choose a curated preset:
+                  </label>
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
+                    {PRESET_AVATARS.map((url, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setProfileForm(p => ({ ...p, profileImage: url }))}
+                        style={{
+                          width: 42,
+                          height: 42,
+                          borderRadius: '50%',
+                          border: `2px solid ${profileForm.profileImage === url ? 'var(--color-primary)' : 'transparent'}`,
+                          padding: 2,
+                          background: 'transparent',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                          transform: profileForm.profileImage === url ? 'scale(1.1)' : 'scale(1)',
+                        }}
+                      >
+                        <img src={url} alt={`Preset ${idx + 1}`} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                      </button>
+                    ))}
+                    {profileForm.profileImage && (
+                      <button
+                        type="button"
+                        onClick={() => setProfileForm(p => ({ ...p, profileImage: '' }))}
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: 6,
+                          border: '1px solid var(--color-border)',
+                          background: 'var(--color-surface)',
+                          color: 'var(--color-text-secondary)',
+                          fontSize: '0.72rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                </div>
+
                 <div className="form-group">
                   <label className="input-label">Email</label>
                   <input className="input" value={user?.email} disabled />
@@ -193,7 +254,7 @@ const DriverContent = ({ user, updateUser }) => {
   const { profile, vehicle } = useSelector((s) => s.driver);
   const [active, setActive] = useState(null);
 
-  const [profileForm, setProfileForm] = useState({ name: user?.name || '', phone: user?.phone || '' });
+  const [profileForm, setProfileForm] = useState({ name: user?.name || '', phone: user?.phone || '', profileImage: user?.profileImage || '' });
   const [vehicleForm, setVehicleForm] = useState({
     licenseNumber: '', vehicleType: 'sedan', vehicleNumber: '',
     vehicleModel: '', vehicleColor: '', vehicleYear: '',
@@ -333,6 +394,57 @@ const DriverContent = ({ user, updateUser }) => {
                 <Input label="Phone" name="phone" type="tel" placeholder="+91 98765 43210"
                   value={profileForm.phone}
                   onChange={(e) => setProfileForm(p => ({ ...p, phone: e.target.value }))} />
+                
+                <div className="form-group">
+                  <Input label="Profile Image URL" name="profileImage" type="url" placeholder="https://example.com/avatar.jpg"
+                    value={profileForm.profileImage}
+                    onChange={(e) => setProfileForm(p => ({ ...p, profileImage: e.target.value }))} />
+                  
+                  <label className="input-label" style={{ fontSize: '0.8rem', marginTop: 4, marginBottom: 8, color: 'var(--color-text-secondary)' }}>
+                    Or choose a curated preset:
+                  </label>
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
+                    {PRESET_AVATARS.map((url, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setProfileForm(p => ({ ...p, profileImage: url }))}
+                        style={{
+                          width: 42,
+                          height: 42,
+                          borderRadius: '50%',
+                          border: `2px solid ${profileForm.profileImage === url ? 'var(--color-primary)' : 'transparent'}`,
+                          padding: 2,
+                          background: 'transparent',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                          transform: profileForm.profileImage === url ? 'scale(1.1)' : 'scale(1)',
+                        }}
+                      >
+                        <img src={url} alt={`Preset ${idx + 1}`} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                      </button>
+                    ))}
+                    {profileForm.profileImage && (
+                      <button
+                        type="button"
+                        onClick={() => setProfileForm(p => ({ ...p, profileImage: '' }))}
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: 6,
+                          border: '1px solid var(--color-border)',
+                          background: 'var(--color-surface)',
+                          color: 'var(--color-text-secondary)',
+                          fontSize: '0.72rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                </div>
+
                 <div className="form-group">
                   <label className="input-label">Email</label>
                   <input className="input" value={user?.email} disabled />
@@ -420,7 +532,7 @@ const AdminContent = ({ user, updateUser }) => {
   const [pwMsg, setPwMsg] = useState('');
   const [pwErrors, setPwErrors] = useState({});
 
-  const [profileForm, setProfileForm] = useState({ name: user?.name || '', phone: user?.phone || '' });
+  const [profileForm, setProfileForm] = useState({ name: user?.name || '', phone: user?.phone || '', profileImage: user?.profileImage || '' });
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileMsg, setProfileMsg] = useState('');
 
@@ -516,6 +628,57 @@ const AdminContent = ({ user, updateUser }) => {
                 <Input label="Phone" name="phone" type="tel" placeholder="+91 98765 43210"
                   value={profileForm.phone}
                   onChange={(e) => setProfileForm(p => ({ ...p, phone: e.target.value }))} />
+                
+                <div className="form-group">
+                  <Input label="Profile Image URL" name="profileImage" type="url" placeholder="https://example.com/avatar.jpg"
+                    value={profileForm.profileImage}
+                    onChange={(e) => setProfileForm(p => ({ ...p, profileImage: e.target.value }))} />
+                  
+                  <label className="input-label" style={{ fontSize: '0.8rem', marginTop: 4, marginBottom: 8, color: '#94a3b8' }}>
+                    Or choose a curated preset:
+                  </label>
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
+                    {PRESET_AVATARS.map((url, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setProfileForm(p => ({ ...p, profileImage: url }))}
+                        style={{
+                          width: 42,
+                          height: 42,
+                          borderRadius: '50%',
+                          border: `2px solid ${profileForm.profileImage === url ? 'var(--color-primary)' : 'transparent'}`,
+                          padding: 2,
+                          background: 'transparent',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                          transform: profileForm.profileImage === url ? 'scale(1.1)' : 'scale(1)',
+                        }}
+                      >
+                        <img src={url} alt={`Preset ${idx + 1}`} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                      </button>
+                    ))}
+                    {profileForm.profileImage && (
+                      <button
+                        type="button"
+                        onClick={() => setProfileForm(p => ({ ...p, profileImage: '' }))}
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: 6,
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          background: 'rgba(0,0,0,0.2)',
+                          color: '#94a3b8',
+                          fontSize: '0.72rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                </div>
+
                 <div className="form-group">
                   <label className="input-label" style={{ color: '#94a3b8' }}>Email</label>
                   <input className="input" value={user?.email} disabled />
@@ -558,9 +721,7 @@ const ProfileSidebar = ({ isOpen, onClose }) => {
   const { user, logout, updateUser } = useAuth();
   const { isDark, toggleTheme } = useTheme();
 
-  const initials = user?.name
-    ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
-    : '?';
+  // initials logic removed as Avatar component is used
 
   const isAdmin = user?.role === 'admin';
 
@@ -649,25 +810,7 @@ const ProfileSidebar = ({ isOpen, onClose }) => {
 
           {/* Avatar & info */}
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{ position: 'relative', flexShrink: 0 }}>
-              <div style={{
-                width: 56, height: 56, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.2)',
-                border: '2.5px solid rgba(255,255,255,0.5)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#fff', fontWeight: 800, fontSize: '1.1rem',
-                backdropFilter: 'blur(8px)',
-              }}>
-                {initials}
-              </div>
-              {/* Online dot */}
-              <div style={{
-                position: 'absolute', bottom: 2, right: 2,
-                width: 10, height: 10, borderRadius: '50%',
-                background: '#4ade80',
-                border: '2px solid rgba(255,255,255,0.5)',
-              }} />
-            </div>
+            <Avatar user={user} size={56} online={true} borderColor="rgba(255,255,255,0.5)" />
             <div>
               <p style={{ margin: 0, fontWeight: 700, fontSize: '1rem', color: '#fff' }}>{user?.name}</p>
               <p style={{ margin: 0, fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', textTransform: 'capitalize' }}>

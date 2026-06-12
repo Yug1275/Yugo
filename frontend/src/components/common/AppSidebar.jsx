@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
+import Avatar from './Avatar';
 
 /**
  * AppSidebar — a sliding left-drawer used by all role layouts.
@@ -14,10 +15,6 @@ import useAuth from '../../hooks/useAuth';
 const AppSidebar = ({ isOpen, onClose, links = [], accentDark = false }) => {
   const { user } = useAuth();
   const location = useLocation();
-
-  const initials = user?.name
-    ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
-    : '?';
 
   // Close on Escape key
   useEffect(() => {
@@ -134,33 +131,7 @@ const AppSidebar = ({ isOpen, onClose, links = [], accentDark = false }) => {
 
           {/* Avatar + user info */}
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ position: 'relative', flexShrink: 0 }}>
-              <div style={{
-                width: 46,
-                height: 46,
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.2)',
-                border: '2.5px solid rgba(255,255,255,0.5)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#fff',
-                fontWeight: 800,
-                fontSize: '1rem',
-                backdropFilter: 'blur(8px)',
-              }}>
-                {initials}
-              </div>
-              {/* Online dot */}
-              <div style={{
-                position: 'absolute',
-                bottom: 1, right: 1,
-                width: 10, height: 10,
-                borderRadius: '50%',
-                background: '#4ade80',
-                border: '2px solid rgba(255,255,255,0.6)',
-              }} />
-            </div>
+            <Avatar user={user} size={46} online={true} borderColor="rgba(255,255,255,0.5)" />
             <div style={{ minWidth: 0 }}>
               <p style={{
                 margin: 0,

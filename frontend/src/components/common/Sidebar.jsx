@@ -1,12 +1,9 @@
 import { NavLink } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
+import Avatar from './Avatar';
 
 const Sidebar = ({ links = [] }) => {
   const { user } = useAuth();
-
-  const initials = user?.name
-    ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
-    : '?';
 
   return (
     <>
@@ -48,40 +45,7 @@ const Sidebar = ({ links = [] }) => {
         />
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 10 }}>
           {/* Avatar with online indicator */}
-          <div style={{ position: 'relative', flexShrink: 0 }}>
-            <div
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.2)',
-                border: '2px solid rgba(255,255,255,0.4)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#fff',
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                backdropFilter: 'blur(8px)',
-              }}
-            >
-              {initials}
-            </div>
-            {/* Online dot */}
-            <div
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                right: 0,
-                width: 10,
-                height: 10,
-                borderRadius: '50%',
-                background: '#4ade80',
-                border: '2px solid transparent',
-                boxShadow: '0 0 0 2px rgba(74,222,128,0.3)',
-              }}
-            />
-          </div>
+          <Avatar user={user} size={40} online={true} borderColor="rgba(255,255,255,0.4)" />
           <div style={{ minWidth: 0 }}>
             <p style={{ margin: 0, fontWeight: 700, fontSize: '0.85rem', color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {user?.name}

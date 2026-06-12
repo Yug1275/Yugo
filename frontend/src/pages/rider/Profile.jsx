@@ -2,8 +2,17 @@ import { useState } from 'react';
 import useAuth from '../../hooks/useAuth';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
+import Avatar from '../../components/common/Avatar';
 import { updateProfileApi, changePasswordApi } from '../../api/userApi';
 import { getInitials } from '../../utils/helpers';
+
+const PRESET_AVATARS = [
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=Jack',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=Milo',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=Luna'
+];
 
 const Profile = () => {
   const { user, updateUser } = useAuth();
@@ -11,6 +20,7 @@ const Profile = () => {
   const [profileForm, setProfileForm] = useState({
     name: user?.name || '',
     phone: user?.phone || '',
+    profileImage: user?.profileImage || '',
   });
   const [profileErrors, setProfileErrors] = useState({});
   const [profileSuccess, setProfileSuccess] = useState('');
@@ -96,23 +106,7 @@ const Profile = () => {
         <div className="card">
           {/* Avatar */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-            <div
-              style={{
-                width: 64,
-                height: 64,
-                borderRadius: '50%',
-                background: 'var(--color-primary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.4rem',
-                fontWeight: 700,
-                color: '#fff',
-                flexShrink: 0,
-              }}
-            >
-              {getInitials(user?.name)}
-            </div>
+            <Avatar user={user} size={64} />
             <div>
               <h4 style={{ margin: 0 }}>{user?.name}</h4>
               <p style={{ margin: 0, fontSize: '0.85rem', textTransform: 'capitalize' }}>
@@ -148,6 +142,68 @@ const Profile = () => {
               onChange={handleProfileChange}
               error={profileErrors.phone}
             />
+            
+            <div className="form-group">
+              <Input
+                label="Profile Image URL"
+                name="profileImage"
+                type="url"
+                placeholder="https://example.com/avatar.jpg"
+                value={profileForm.profileImage}
+                onChange={handleProfileChange}
+                error={profileErrors.profileImage}
+              />
+              
+              <label className="input-label" style={{ fontSize: '0.8rem', marginTop: 4, marginBottom: 8, color: 'var(--color-text-secondary)' }}>
+                Or choose a curated preset:
+              </label>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
+                {PRESET_AVATARS.map((url, idx) => (
+                  <button
+                    key={url}
+                    type="button"
+                    onClick={() => {
+                      setProfileForm(p => ({ ...p, profileImage: url }));
+                      if (profileErrors.profileImage) {
+                        setProfileErrors(prev => ({ ...prev, profileImage: '' }));
+                      }
+                    }}
+                    style={{
+                      width: 42,
+                      height: 42,
+                      borderRadius: '50%',
+                      border: `2px solid ${profileForm.profileImage === url ? 'var(--color-primary)' : 'transparent'}`,
+                      padding: 2,
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      transform: profileForm.profileImage === url ? 'scale(1.1)' : 'scale(1)',
+                    }}
+                  >
+                    <img src={url} alt={`Preset ${idx + 1}`} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                  </button>
+                ))}
+                {profileForm.profileImage && (
+                  <button
+                    type="button"
+                    onClick={() => setProfileForm(p => ({ ...p, profileImage: '' }))}
+                    style={{
+                      padding: '4px 8px',
+                      borderRadius: 6,
+                      border: '1px solid var(--color-border)',
+                      background: 'var(--color-surface)',
+                      color: 'var(--color-text-secondary)',
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+
             <div className="form-group">
               <label className="input-label">Email address</label>
               <input className="input" value={user?.email} disabled />
