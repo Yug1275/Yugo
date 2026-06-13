@@ -6,6 +6,12 @@ export const registerApi = (data) =>
 export const loginApi = (data) =>
   axiosInstance.post('/auth/login', data);
 
+export const forgotPasswordApi = (data) =>
+  axiosInstance.post('/auth/forgot-password', data);
+
+export const resetPasswordApi = (token, data) =>
+  axiosInstance.put(`/auth/reset-password/${token}`, data);
+
 export const getProfileApi = () =>
   axiosInstance.get('/auth/profile');
 

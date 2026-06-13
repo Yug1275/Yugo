@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import AuthLayout from '../../layouts/AuthLayout';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
+import useAuth from '../../hooks/useAuth';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const { forgotPassword } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const validate = () => {
@@ -26,10 +28,14 @@ const ForgotPassword = () => {
     }
 
     setLoading(true);
-    // Simulated — real forgot password API will be added later
-    await new Promise((res) => setTimeout(res, 1200));
+    const result = await forgotPassword(email);
     setLoading(false);
-    setSubmitted(true);
+    
+    if (result.success) {
+      setSubmitted(true);
+    } else {
+      setError(result.error);
+    }
   };
 
   return (

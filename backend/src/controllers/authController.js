@@ -4,7 +4,9 @@ const asyncHandler = require('../utils/asyncHandler');
 const generateToken = require('../utils/generateToken');
 const { AppError } = require('../middleware/errorHandler');
 const { isValidEmail, isValidPassword } = require('../utils/validators');
+const crypto = require('crypto');
 const { sendSuccess } = require('../utils/responseHelper');
+const sendEmail = require('../utils/sendEmail');
 
 // ─── @desc    Register a new user (rider or driver)
 // ─── @route   POST /api/auth/register
@@ -22,7 +24,7 @@ const register = asyncHandler(async (req, res, next) => {
   }
 
   if (!isValidPassword(password)) {
-    return next(new AppError('Password must be at least 6 characters', 400));
+    return next(new AppError('Password must meet strength requirements (min 8 chars, uppercase, lowercase, number, special char)', 400));
   }
 
   const allowedRoles = ['rider', 'driver'];
@@ -149,7 +151,7 @@ const changePassword = asyncHandler(async (req, res, next) => {
   }
 
   if (!isValidPassword(newPassword)) {
-    return next(new AppError('New password must be at least 6 characters', 400));
+    return next(new AppError('New password must meet strength requirements', 400));
   }
 
   const user = await User.findById(req.user._id).select('+password');
@@ -173,6 +175,93 @@ const logout = asyncHandler(async (req, res, next) => {
   return sendSuccess(res, 200, {}, 'Logged out successfully');
 });
 
+// ─── @desc    Forgot password
+// ─── @route   POST /api/auth/forgot-password
+// ─── @access  Public
+const forgotPassword = asyncHandler(async (req, res, next) => {
+  const user = await User.findOne({ email: req.body.email.toLowerCase() });
+
+  if (!user) {
+    // Return success to prevent email enumeration attacks
+    return sendSuccess(res, 200, {}, 'If an account with that email exists, we have sent a password reset link.');
+  }
+
+  // Get reset token
+  const resetToken = user.getResetPasswordToken();
+
+  await user.save({ validateBeforeSave: false });
+
+  // Create reset URL
+  const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
+
+  const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl}`;
+  const html = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #2563eb;">Password Reset Request</h2>
+      <p>You requested a password reset. Click the button below to set a new password:</p>
+      <a href="${resetUrl}" style="display: inline-block; padding: 10px 20px; background-color: #2563eb; color: #fff; text-decoration: none; border-radius: 5px; margin-top: 10px;">Reset Password</a>
+      <p style="margin-top: 20px; font-size: 0.9em; color: #666;">If you didn't request this, please ignore this email and your password will remain unchanged.</p>
+    </div>
+  `;
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: 'Password reset token',
+      message,
+      html,
+    });
+
+    res.status(200).json({ success: true, data: 'Email sent' });
+  } catch (error) {
+    console.error(error);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save({ validateBeforeSave: false });
+
+    return next(new AppError('Email could not be sent', 500));
+  }
+});
+
+// ─── @desc    Reset password
+// ─── @route   PUT /api/auth/reset-password/:token
+// ─── @access  Public
+const resetPassword = asyncHandler(async (req, res, next) => {
+  // Get hashed token
+  const resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(req.params.token)
+    .digest('hex');
+
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return next(new AppError('Invalid token or token has expired', 400));
+  }
+
+  // Validate new password
+  if (!isValidPassword(req.body.password)) {
+    return next(new AppError('Password must meet strength requirements', 400));
+  }
+
+  // Set new password
+  user.password = req.body.password;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+  await user.save();
+
+  const token = generateToken(user._id, user.role);
+
+  return sendSuccess(res, 200, {
+    token,
+    user: user.toSafeObject(),
+  }, 'Password reset successful');
+});
+
 module.exports = {
   register,
   login,
@@ -180,4 +269,6 @@ module.exports = {
   updateProfile,
   changePassword,
   logout,
+  forgotPassword,
+  resetPassword,
 };

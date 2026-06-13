@@ -15,7 +15,14 @@ const isValidEmail = (email) => {
 };
 
 const isValidPassword = (password) => {
-  return typeof password === 'string' && password.length >= 6;
+  return (
+    typeof password === 'string' &&
+    password.length >= 8 &&
+    /[A-Z]/.test(password) &&
+    /[a-z]/.test(password) &&
+    /[0-9]/.test(password) &&
+    /[!@#$%^&*(),.?":{}|<>]/.test(password)
+  );
 };
 
 module.exports = { validateFields, isValidEmail, isValidPassword };

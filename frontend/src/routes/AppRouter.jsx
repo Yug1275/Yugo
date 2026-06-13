@@ -4,9 +4,11 @@ import ProtectedRoute from './ProtectedRoute';
 import useAuth from '../hooks/useAuth';
 
 // Auth
+import Home from '../pages/Home';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
 import ForgotPassword from '../pages/auth/ForgotPassword';
+import ResetPassword from '../pages/auth/ResetPassword';
 
 // Rider
 import RiderLayout from '../layouts/RiderLayout';
@@ -57,12 +59,13 @@ const AppRouter = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<RoleRedirect />} />
+        <Route path="/" element={<Home />} />
 
         {/* Auth */}
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         {/* Driver complete profile (no layout, standalone) */}
         <Route

@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { setCredentials, logout, setError, clearError, updateUser } from '../store/authSlice';
-import { loginApi, registerApi, logoutApi } from '../api/authApi';
+import { loginApi, registerApi, logoutApi, forgotPasswordApi, resetPasswordApi } from '../api/authApi';
 import { disconnectSocket } from '../socket/socket';
 
 
@@ -47,6 +47,28 @@ const useAuth = () => {
     }
   };
 
+  const forgotPassword = async (email) => {
+    try {
+      dispatch(clearError());
+      const res = await forgotPasswordApi({ email });
+      return { success: true, message: res.data.message || 'Email sent' };
+    } catch (err) {
+      const message = err.response?.data?.error || 'Failed to send reset email';
+      return { success: false, error: message };
+    }
+  };
+
+  const resetPassword = async (token, password) => {
+    try {
+      dispatch(clearError());
+      const res = await resetPasswordApi(token, { password });
+      return { success: true, message: res.data.message || 'Password reset successful' };
+    } catch (err) {
+      const message = err.response?.data?.error || 'Failed to reset password';
+      return { success: false, error: message };
+    }
+  };
+
   return {
     user,
     token,
@@ -56,6 +78,8 @@ const useAuth = () => {
     login,
     register,
     logout: logoutUser,
+    forgotPassword,
+    resetPassword,
     clearError: () => dispatch(clearError()),
     updateUser: (data) => dispatch(updateUser(data)),
   };
